@@ -5,13 +5,10 @@ import { Menu, X, LogOut, User, ChevronRight } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import './styles/Navbar.css';
 
-export function LogoSVG({ light = true }) {
+export function LogoSVG() {
   return (
     <div className="logo-wrap">
-      <div className="logo-badge">3D</div>
-      <span className={`logo-wordmark${light ? ' logo-wordmark--light' : ' logo-wordmark--dark'}`}>
-        3DEES<span className="logo-accent">Consulting</span>
-      </span>
+      <img src="/3dees_Logo.png" alt="" width={120} />
     </div>
   );
 }

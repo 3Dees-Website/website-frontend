@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
+import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import { Users, Compass, BarChart, Server } from 'lucide-react';
+import { motion } from 'motion/react';
+import { Users, Compass, BarChart, Server, Shield } from 'lucide-react';
 import './styles/About.css';
 
 export function About() {
@@ -18,30 +19,15 @@ export function About() {
     { title: 'Mass Recruitment', desc: 'Coordinating high-volume state vetting, nationwide tests, and biometric onboarding structures.', icon: <Server size={24} className="service-icon" /> },
   ];
 
-  // Animate-on-scroll using IntersectionObserver (replaces framer-motion whileInView)
-  const observerRef = useRef(null);
-
-  useEffect(() => {
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    const targets = document.querySelectorAll('.fade-up, .scale-in');
-    targets.forEach((el) => observerRef.current.observe(el));
-
-    return () => observerRef.current.disconnect();
-  }, []);
-
   return (
-    <div className="about-page" id="about-us-page">
-
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.4 }}
+      className="about-page"
+      id="about-us-page"
+    >
       {/* Page Header */}
       <section className="about-hero">
         <div className="about-hero-inner">
@@ -110,20 +96,22 @@ export function About() {
             <h2 className="section-title">How We Engineer Workforce Excellence</h2>
             <p className="section-body">A modern HR suite configured to solve specialized personnel shortages across key Nigerian economic grids.</p>
           </div>
-
           <div className="services-grid">
             {services.map((ser, serIdx) => (
-              <div
+              <motion.div
                 key={ser.title}
-                className="service-card fade-up"
-                style={{ transitionDelay: `${serIdx * 0.1}s` }}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: serIdx * 0.1, duration: 0.4 }}
+                className="service-card"
               >
                 <div>
                   <div className="service-icon-wrap">{ser.icon}</div>
                   <h3 className="service-card-title">{ser.title}</h3>
                   <p className="service-card-body">{ser.desc}</p>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -144,7 +132,7 @@ export function About() {
           </div>
           <div className="governance-badge-wrap">
             <div className="governance-badge">
-              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="governance-shield-icon"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <Shield size={40} className="governance-shield-icon" />
               <h4 className="governance-badge-title">Charter Vetted</h4>
               <p className="governance-badge-body">Compliance guidelines reviewed and validated annually by executive board counsel.</p>
             </div>
@@ -160,13 +148,15 @@ export function About() {
             <h2 className="section-title">Dedicated Executive Board</h2>
             <p className="section-body">The veterans coordinating administrative integrity and corporate integrations at our Abuja offices.</p>
           </div>
-
           <div className="team-grid">
             {team.map((t, idx) => (
-              <div
+              <motion.div
                 key={t.name}
-                className="team-card scale-in"
-                style={{ transitionDelay: `${idx * 0.1}s` }}
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1, duration: 0.4 }}
+                className="team-card"
               >
                 <div>
                   <div className="team-avatar">
@@ -176,7 +166,7 @@ export function About() {
                   <span className="team-role">{t.role}</span>
                   <p className="team-bio">{t.bio}</p>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -194,6 +184,6 @@ export function About() {
           </RouterLink>
         </div>
       </section>
-    </div>
+    </motion.div>
   );
 }

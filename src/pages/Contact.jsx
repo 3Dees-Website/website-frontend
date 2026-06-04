@@ -69,7 +69,7 @@ export function Contact() {
         <span className="contact-eyebrow">Connect with 3DEES</span>
         <h1 className="contact-title">Speak with Our Placements Team</h1>
         <p className="contact-subtitle">
-          Have an urgent recruitment requirement, seeking a partnership, or inquiring about EGI portal syncs? Our workforce coordinators are here to assist.
+          Have an urgent recruitment requirement or seeking a partnership? Our workforce coordinators are here to assist.
         </p>
       </div>
 
@@ -233,21 +233,21 @@ export function Contact() {
           </div>
 
           {/* Map Placeholder */}
-          <div className="contact-map-card">
-            <span className="contact-map-label">Simulated Google Maps Placement</span>
+          {/* <div className="contact-map-card"> */}
+            {/* <span className="contact-map-label">Simulated Google Maps Placement</span> */}
 
-            <div className="contact-map-box" id="simulated-google-map">
+            {/* <div className="contact-map-box" id="simulated-google-map"> */}
               {/* Grid lines */}
-              <div className="contact-map-grid">
+              {/* <div className="contact-map-grid">
                 <svg className="contact-map-svg">
                   <path d="M 0,20 L 500,20 M 0,60 L 500,60 M 0,100 L 500,100 M 0,140 L 500,140 M 0,180 L 500,180" stroke="#000" strokeWidth="1" />
                   <path d="M 50,0 L 50,300 M 120,0 L 120,300 M 190,0 L 190,300 M 260,0 L 260,300 M 330,0 L 330,300" stroke="#000" strokeWidth="1" />
                   <path d="M 0,0 L 400,250 M 200,0 L 400,100 M 0,150 L 300,300" stroke="#FF6600" strokeWidth="2" strokeDasharray="3,3" />
                 </svg>
-              </div>
+              </div> */}
 
               {/* Pin */}
-              <motion.div
+              {/* <motion.div
                 animate={{ y: [0, -6, 0] }}
                 transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
                 className="contact-map-pin"
@@ -258,19 +258,19 @@ export function Contact() {
                 <div className="contact-map-pin-label">
                   Abuja: Suite D66 Efab Mall
                 </div>
-              </motion.div>
+              </motion.div> */}
 
               {/* GPS badge */}
-              <div className="contact-map-gps">
+              {/* <div className="contact-map-gps">
                 GPS Pin Lock: Suite D66 Efab
-              </div>
-            </div>
+              </div> */}
+            {/* </div> */}
 
-            <p className="contact-map-note">
+            {/* <p className="contact-map-note">
               <ShieldAlert className="contact-map-note-icon" />
               Our administrative coordinators welcome drop-ins for pre-scheduled credential verifications only. General job applications must be submitted via the online portal.
-            </p>
-          </div>
+            </p> */}
+          {/* </div> */}
         </div>
       </div>
     </motion.div>

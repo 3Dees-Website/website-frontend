@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Menu, X, LogOut, User, ChevronRight } from 'lucide-react';
@@ -8,7 +8,7 @@ import './styles/Navbar.css';
 export function LogoSVG() {
   return (
     <div className="logo-wrap">
-      <img src="/3dees_Logo.png" alt="" width={120} />
+      <img src="/3dees_Logo.png" alt="" width={130} />
     </div>
   );
 }
@@ -17,6 +17,13 @@ export function Navbar() {
   const { currentUser, logout } = useAuth();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const navigation = [
     { name: 'Home', path: '/' },
@@ -35,13 +42,44 @@ export function Navbar() {
   const isActive = (path) =>
     location.pathname === path || (path !== '/' && location.pathname.startsWith(path));
 
+  const drawerVariants = {
+    hidden: { opacity: 0, y: -12 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.22, ease: [0.22, 1, 0.36, 1] },
+    },
+    exit: {
+      opacity: 0,
+      y: -8,
+      transition: { duration: 0.16, ease: 'easeIn' },
+    },
+  };
+
+  const linkVariants = {
+    hidden: { opacity: 0, x: -10 },
+    visible: (i) => ({
+      opacity: 1,
+      x: 0,
+      transition: { delay: i * 0.045, duration: 0.2, ease: 'easeOut' },
+    }),
+  };
+
   return (
-    <nav className="navbar" id="portal-navbar">
+    <motion.nav
+      className={`navbar${scrolled ? ' navbar--scrolled' : ''}`}
+      id="portal-navbar"
+      initial={{ y: -72 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+    >
       <div className="navbar-inner">
 
         {/* Logo */}
         <Link to="/" className="navbar-logo-link" onClick={handleLinkClick}>
-          <LogoSVG light={true} />
+          <motion.div whileHover={{ scale: 1.03 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
+            <LogoSVG />
+          </motion.div>
         </Link>
 
         {/* Desktop Menu */}
@@ -58,7 +96,7 @@ export function Navbar() {
                 <motion.div
                   layoutId="activeNavLine"
                   className="nav-active-line"
-                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 32 }}
                 />
               )}
             </Link>
@@ -69,68 +107,94 @@ export function Navbar() {
         <div className="navbar-desktop-ctas">
           {currentUser ? (
             <div className="navbar-user-actions">
-              <Link
-                to={getDashboardPath()}
-                className="btn-nav-dashboard"
-                id="navbar-dashboard-link"
-              >
-                <User size={14} className="btn-nav-icon" />
-                <span>Dashboard</span>
-              </Link>
-              <button
+              <motion.div whileHover={{ y: -1 }} whileTap={{ scale: 0.97 }}>
+                <Link
+                  to={getDashboardPath()}
+                  className="btn-nav-dashboard"
+                  id="navbar-dashboard-link"
+                >
+                  <User size={14} className="btn-nav-icon" />
+                  <span>Dashboard</span>
+                </Link>
+              </motion.div>
+              <motion.button
                 onClick={logout}
                 className="btn-nav-logout"
                 id="navbar-logout-btn"
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.97 }}
               >
                 <LogOut size={14} />
                 <span>Sign Out</span>
-              </button>
+              </motion.button>
             </div>
           ) : (
-            <Link to="/admin/login" className="btn-nav-login" id="navbar-login-btn">
-              Admin Login
-            </Link>
+            <motion.div whileHover={{ y: -1 }} whileTap={{ scale: 0.97 }}>
+              <Link to="/admin/login" className="btn-nav-login" id="navbar-login-btn">
+                Admin Login
+              </Link>
+            </motion.div>
           )}
         </div>
 
         {/* Mobile Toggle */}
-        <button
+        <motion.button
           onClick={() => setMobileOpen(!mobileOpen)}
           className="navbar-mobile-toggle"
           id="navbar-mobile-toggle"
           aria-label="Toggle navigation"
+          whileTap={{ scale: 0.9 }}
         >
-          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={mobileOpen ? 'close' : 'open'}
+              initial={{ rotate: -90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: 90, opacity: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+            </motion.div>
+          </AnimatePresence>
+        </motion.button>
       </div>
 
       {/* Mobile Drawer */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
+            variants={drawerVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
             className="mobile-drawer"
             id="mobile-nav-drawer"
           >
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                to={item.path}
-                onClick={handleLinkClick}
-                className={`mobile-nav-link${isActive(item.path) ? ' mobile-nav-link--active' : ''}`}
-              >
-                {item.name}
-              </Link>
+            {navigation.map((item, i) => (
+              <motion.div key={item.name} custom={i} variants={linkVariants} initial="hidden" animate="visible">
+                <Link
+                  to={item.path}
+                  onClick={handleLinkClick}
+                  className={`mobile-nav-link${isActive(item.path) ? ' mobile-nav-link--active' : ''}`}
+                >
+                  <span>{item.name}</span>
+                  <ChevronRight size={16} className="mobile-nav-chevron" />
+                </Link>
+              </motion.div>
             ))}
 
-            <div className="mobile-nav-cta-group">
+            <motion.div
+              className="mobile-nav-cta-group"
+              custom={navigation.length}
+              variants={linkVariants}
+              initial="hidden"
+              animate="visible"
+            >
               {currentUser ? (
                 <>
                   <div className="mobile-user-label">
                     <User size={14} className="mobile-user-icon" />
-                    <span>Representative: {currentUser.name}</span>
+                    <span>{currentUser.name}</span>
                   </div>
                   <Link
                     to={getDashboardPath()}
@@ -157,10 +221,10 @@ export function Navbar() {
                   <ChevronRight size={16} />
                 </Link>
               )}
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-    </nav>
+    </motion.nav>
   );
 }

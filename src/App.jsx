@@ -3,69 +3,69 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// import React, { Suspense } from 'react';
-// import { BrowserRouter, Routes, Route, Outlet, Navigate } from 'react-router-dom';
-// import { PortalProvider } from './context/PortalContext';
-// import { ToastContainer } from './components/Toast';
-// import { Navbar } from './components/Navbar';
-// import { Footer } from './components/Footer';
-// import { ProtectedRoute } from './components/ProtectedRoute';
-// import { AdminLayout } from './components/AdminLayout';
+import React, { Suspense } from 'react';
+import { BrowserRouter, Routes, Route, Outlet, Navigate } from 'react-router-dom';
+import { PortalProvider } from './context/PortalContext';
+import { ToastContainer } from './components/Toast';
+import { Navbar } from './components/Navbar';
+import { Footer } from './components/Footer';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { AdminLayout } from './components/AdminLayout';
 import './App.css';
 
 // Public pages
-// import { Home } from './pages/Home';
-// import { Jobs } from './pages/Jobs';
-// import { JobDetail } from './pages/JobDetail';
-// import { Apply } from './pages/Apply';
-// import { About } from './pages/About';
-// import { Contact } from './pages/Contact';
-// import { AdminLogin } from './pages/AdminLogin';
+import { Home } from './pages/Home';
+import { Jobs } from './pages/Jobs';
+import { JobDetail } from './pages/JobDetail';
+import { Apply } from './pages/Apply';
+import { About } from './pages/About';
+import { Contact } from './pages/Contact';
+import { AdminLogin } from './pages/AdminLogin';
 
-// // Admin panel pages
-// import { AdminDashboard } from './pages/AdminDashboard';
-// import { AdminJobs } from './pages/AdminJobs';
-// import { AdminApplications } from './pages/AdminApplications';
+// Admin panel pages
+import { AdminDashboard } from './pages/AdminDashboard';
+import { AdminJobs } from './pages/AdminJobs';
+import { AdminApplications } from './pages/AdminApplications';
 
-// // Superadmin panel pages
-// import { SuperadminDashboard } from './pages/SuperadminDashboard';
-// import { SuperadminManageAdmins } from './pages/SuperadminManageAdmins';
-// import { SuperadminViewAllApplications } from './pages/SuperadminViewAllApplications';
-// import { SuperadminAuditTrail } from './pages/SuperadminAuditTrail';
+// Superadmin panel pages
+import { SuperadminDashboard } from './pages/SuperadminDashboard';
+import { SuperadminManageAdmins } from './pages/SuperadminManageAdmins';
+import { SuperadminViewAllApplications } from './pages/SuperadminViewAllApplications';
+import { SuperadminAuditTrail } from './pages/SuperadminAuditTrail';
 
-// function PanelLoaderPlaceholder() {
-//   return (
-//     <div className="panel-loader-placeholder">
-//       <svg className="panel-loader-spinner" fill="none" viewBox="0 0 24 24">
-//         <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-//         <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-//       </svg>
-//       <span>Authorizing Workspace Panels...</span>
-//     </div>
-//   );
-// }
+function PanelLoaderPlaceholder() {
+  return (
+    <div className="panel-loader-placeholder">
+      <svg className="panel-loader-spinner" fill="none" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+        <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+      </svg>
+      <span>Authorizing Workspace Panels...</span>
+    </div>
+  );
+}
 
-// function PublicBaseLayout() {
-//   return (
-//     <div className="public-base-layout">
-//       <Navbar />
-//       <main className="public-base-main">
-//         <Outlet />
-//       </main>
-//       <Footer />
-//     </div>
-//   );
-// }
+function PublicBaseLayout() {
+  return (
+    <div className="public-base-layout">
+      <Navbar />
+      <main className="public-base-main">
+        <Outlet />
+      </main>
+      <Footer />
+    </div>
+  );
+}
 
 export default function App() {
   return (
     <PortalProvider>
-      {/* <BrowserRouter>
+      <BrowserRouter>
         <ToastContainer />
 
         <Routes>
           {/* GENERAL GUEST DIRECTORIES CHANNELS */}
-          {/* <Route element={<PublicBaseLayout />}>
+          <Route element={<PublicBaseLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/jobs" element={<Jobs />} />
             <Route path="/jobs/:id" element={<JobDetail />} />
@@ -73,10 +73,10 @@ export default function App() {
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/admin/login" element={<AdminLogin />} />
-          </Route> */}
+          </Route>
 
           {/* ADMIN OPERATIONS AREA SECURED GATES */}
-          {/* <Route
+          <Route
             path="/admin"
             element={
               <ProtectedRoute allowedRole="admin">
@@ -92,10 +92,10 @@ export default function App() {
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="jobs" element={<AdminJobs />} />
             <Route path="applications" element={<AdminApplications />} />
-          </Route> */}
+          </Route>
 
           {/* SUPERADMIN OVERSIGHT AREA SECURED MASTER CLEARANCES */}
-          {/* <Route
+          <Route
             path="/superadmin"
             element={
               <ProtectedRoute allowedRole="superadmin">
@@ -112,12 +112,12 @@ export default function App() {
             <Route path="admins" element={<SuperadminManageAdmins />} />
             <Route path="applications" element={<SuperadminViewAllApplications />} />
             <Route path="audit" element={<SuperadminAuditTrail />} />
-          </Route> */}
+          </Route>
 
           {/* CATCH ALL WILDCARDS */}
-          {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
-        {/* </Routes> */}
-      {/* </BrowserRouter>  */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter> 
     </PortalProvider>
   );
 }

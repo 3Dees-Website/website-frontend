@@ -1,6 +1,7 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, MapPin, Phone, Linkedin, Twitter, Facebook } from 'lucide-react';
+import { Mail, MapPin, Phone } from 'lucide-react';
+import { FaLinkedinIn, FaFacebookF } from 'react-icons/fa';
+import { FaXTwitter } from 'react-icons/fa6';
 import { LogoSVG } from './Navbar';
 import './styles/Footer.css';
 
@@ -19,13 +20,13 @@ export function Footer() {
           </p>
           <div className="footer-socials">
             <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="footer-social-link" aria-label="LinkedIn">
-              <Linkedin size={16} />
+              <FaLinkedinIn size={16} />
             </a>
             <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="footer-social-link" aria-label="X / Twitter">
-              <Twitter size={16} />
+              <FaXTwitter size={16} />
             </a>
             <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="footer-social-link" aria-label="Facebook">
-              <Facebook size={16} />
+              <FaFacebookF size={16} />
             </a>
           </div>
         </div>

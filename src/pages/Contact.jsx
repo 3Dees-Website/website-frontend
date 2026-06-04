@@ -6,7 +6,7 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { useToast } from '../hooks/useToast';
-import { MapPin, Phone, Mail, Clock, Send, ShieldAlert, Navigation } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react';
 import './styles/Contact.css';
 
 export function Contact() {

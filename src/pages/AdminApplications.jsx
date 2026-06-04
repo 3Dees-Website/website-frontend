@@ -377,7 +377,7 @@ export function AdminApplications() {
                           <p className="doc-name">{fileObj.name}</p>
                           <span className="doc-meta">{fileObj.size} • {fileObj.type.split('/').pop()?.toUpperCase()}</span>
                         </div>
-                        
+                        <a
                           href={fileObj.url}
                           download={fileObj.name}
                           onClick={() => addToast('success', 'File Download Initiated', `Opening mock stream for ${fileObj.name}`)}

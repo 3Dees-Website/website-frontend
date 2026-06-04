@@ -153,7 +153,7 @@ export function Home() {
             Expert Workforce Placements Anchored in Transparency & Compliance
           </h2>
           <p className="home-section-body">
-            For nearly two decades, 3DEES Consulting works has spearheaded recruitment logistics, mass screening, and verification management for tier-1 bank organizations, commercial agricultural farms, federal contractors, and private conglomerates.
+            3DEES Consulting works has spearheaded recruitment logistics, mass screening, and verification management for commercial agricultural farms, federal contractors, and private conglomerates.
           </p>
           <p className="home-section-body">
             Our governance-driven approach minimizes hiring cycle overhead while securing strict, non-compromised background verifications for your high-growth project setups.

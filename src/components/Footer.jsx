@@ -14,7 +14,7 @@ export function Footer() {
 
         {/* Column 1: About */}
         <div className="footer-col">
-          <LogoSVG light={true} />
+          <LogoSVG />
           <p className="footer-about-text">
             3DEES Consulting Works (RC: 9160527) is a trusted, licensed Nigerian workforce solutions firm committed to aligning high-performing candidates with professional corporate sponsors across Sub-Saharan Africa.
           </p>
@@ -39,7 +39,6 @@ export function Footer() {
             <li><Link to="/jobs" className="footer-link">Career Opportunities</Link></li>
             <li><Link to="/about" className="footer-link">Who We Are</Link></li>
             <li><Link to="/contact" className="footer-link">Get In Touch</Link></li>
-            <li><Link to="/admin/login" className="footer-link footer-link--highlight">Portal Dashboard Login</Link></li>
           </ul>
         </div>
 
@@ -51,7 +50,6 @@ export function Footer() {
             <li>Workforce Resource Planning</li>
             <li>Human Resource Consultation</li>
             <li>Organisational Compliance Audits</li>
-            <li>EGI Portal Sync Partnerships</li>
           </ul>
         </div>
 
@@ -60,15 +58,15 @@ export function Footer() {
           <h4 className="footer-col-title">Headquarters</h4>
           <ul className="footer-contact-list">
             <li className="footer-contact-item">
-              <MapPin size={16} className="footer-contact-icon" />
+              <MapPin size={14} className="footer-contact-icon" />
               <span>Suite D66 Efab Mall, Area 11, Garki Abuja FCT, Nigeria</span>
             </li>
             <li className="footer-contact-item">
-              <Phone size={16} className="footer-contact-icon" />
+              <Phone size={14} className="footer-contact-icon" />
               <span>+234-8149599505, +234-9071766667</span>
             </li>
             <li className="footer-contact-item">
-              <Mail size={16} className="footer-contact-icon" />
+              <Mail size={14} className="footer-contact-icon" />
               <a href="mailto:consultingworks@3dees.net" className="footer-link">
                 consultingworks@3dees.net
               </a>

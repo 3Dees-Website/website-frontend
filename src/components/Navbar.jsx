@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, LogOut, User, ChevronRight } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
+import { Menu, X, ChevronRight } from 'lucide-react';
 import './styles/Navbar.css';
 
 export function LogoSVG() {
@@ -14,7 +13,6 @@ export function LogoSVG() {
 }
 
 export function Navbar() {
-  const { currentUser, logout } = useAuth();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -33,11 +31,6 @@ export function Navbar() {
   ];
 
   const handleLinkClick = () => setMobileOpen(false);
-
-  const getDashboardPath = () => {
-    if (!currentUser) return '/admin/login';
-    return currentUser.role === 'superadmin' ? '/superadmin/dashboard' : '/admin/dashboard';
-  };
 
   const isActive = (path) =>
     location.pathname === path || (path !== '/' && location.pathname.startsWith(path));
@@ -103,40 +96,6 @@ export function Navbar() {
           ))}
         </div>
 
-        {/* Desktop CTAs */}
-        <div className="navbar-desktop-ctas">
-          {currentUser ? (
-            <div className="navbar-user-actions">
-              <motion.div whileHover={{ y: -1 }} whileTap={{ scale: 0.97 }}>
-                <Link
-                  to={getDashboardPath()}
-                  className="btn-nav-dashboard"
-                  id="navbar-dashboard-link"
-                >
-                  <User size={14} className="btn-nav-icon" />
-                  <span>Dashboard</span>
-                </Link>
-              </motion.div>
-              <motion.button
-                onClick={logout}
-                className="btn-nav-logout"
-                id="navbar-logout-btn"
-                whileHover={{ y: -1 }}
-                whileTap={{ scale: 0.97 }}
-              >
-                <LogOut size={14} />
-                <span>Sign Out</span>
-              </motion.button>
-            </div>
-          ) : (
-            <motion.div whileHover={{ y: -1 }} whileTap={{ scale: 0.97 }}>
-              <Link to="/admin/login" className="btn-nav-login" id="navbar-login-btn">
-                Admin Login
-              </Link>
-            </motion.div>
-          )}
-        </div>
-
         {/* Mobile Toggle */}
         <motion.button
           onClick={() => setMobileOpen(!mobileOpen)}
@@ -182,46 +141,6 @@ export function Navbar() {
                 </Link>
               </motion.div>
             ))}
-
-            <motion.div
-              className="mobile-nav-cta-group"
-              custom={navigation.length}
-              variants={linkVariants}
-              initial="hidden"
-              animate="visible"
-            >
-              {currentUser ? (
-                <>
-                  <div className="mobile-user-label">
-                    <User size={14} className="mobile-user-icon" />
-                    <span>{currentUser.name}</span>
-                  </div>
-                  <Link
-                    to={getDashboardPath()}
-                    onClick={handleLinkClick}
-                    className="btn-mobile-dashboard"
-                  >
-                    Manage Dashboard
-                  </Link>
-                  <button
-                    onClick={() => { logout(); handleLinkClick(); }}
-                    className="btn-mobile-logout"
-                  >
-                    <LogOut size={16} />
-                    <span>Sign Out</span>
-                  </button>
-                </>
-              ) : (
-                <Link
-                  to="/admin/login"
-                  onClick={handleLinkClick}
-                  className="btn-mobile-login"
-                >
-                  <span>Portal Login</span>
-                  <ChevronRight size={16} />
-                </Link>
-              )}
-            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

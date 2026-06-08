@@ -59,6 +59,36 @@
   }
 }
 
+@media (max-width: 639px) {
+  .home-hero {
+    padding: 2.5rem 1rem;
+    align-items: center;
+  }
+
+  .home-hero-left {
+    align-items: center;
+    text-align: center;
+  }
+
+  .home-hero-ctas {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .home-hero-right {
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .home-hero-stats-card {
+    width: 100%;
+  }
+
+  .home-hero-glow {
+    display: none;
+  }
+}
+
 /* Left */
 .home-hero-left {
   flex-grow: 1;
@@ -334,6 +364,12 @@
   gap: 1rem;
 }
 
+@media (max-width: 639px) {
+  .home-counters-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .home-stat-card {
   background: #fff;
   padding: 1.5rem;
@@ -548,6 +584,16 @@
   gap: 0.75rem;
 }
 
+@media (max-width: 639px) {
+  .home-featured-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .home-featured-title {
+    white-space: normal;
+  }
+}
+
 .home-featured-btn-detail {
   text-align: center;
   font-weight: 700;
@@ -636,6 +682,17 @@
   .home-steps-grid {
     grid-template-columns: repeat(6, 1fr);
     gap: 1rem;
+  }
+}
+
+@media (max-width: 639px) {
+  .home-steps-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-step {
+    text-align: left;
+    align-items: flex-start;
   }
 }
 

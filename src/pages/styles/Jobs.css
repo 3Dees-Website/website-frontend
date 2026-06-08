@@ -178,6 +178,31 @@
   color: var(--color-brand-secondary);
 }
 
+@media (max-width: 639px) {
+  .jobs-filters-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .jobs-reset-row {
+    justify-content: stretch;
+  }
+
+  .jobs-reset-btn {
+    width: 100%;
+  }
+
+  .job-card-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .job-card-actions {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: stretch;
+  }
+}
+
 .jobs-reset-icon {
   width: 0.875rem;
   height: 0.875rem;

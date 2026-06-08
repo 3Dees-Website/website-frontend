@@ -25,6 +25,13 @@
   align-items: center;
   justify-content: space-between;
   gap: 2rem;
+  padding: 0 1rem;
+}
+
+@media (min-width: 768px) {
+  .navbar-inner {
+    padding: 0;
+  }
 }
 
 /* ── Logo ── */
@@ -217,6 +224,12 @@
 .mobile-nav-link:hover .mobile-nav-chevron {
   color: var(--color-brand-primary);
   transform: translateX(3px);
+}
+
+@media (max-width: 767px) {
+  .mobile-nav-link {
+    white-space: normal;
+  }
 }
 
 .mobile-nav-cta-group {

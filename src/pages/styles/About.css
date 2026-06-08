@@ -171,6 +171,18 @@
   .about-profile { grid-template-columns: 7fr 5fr; }
 }
 
+@media (max-width: 639px) {
+  .about-hero,
+  .about-profile {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .vetting-code-card {
+    padding: 1.5rem;
+  }
+}
+
 .about-profile-text {
   display: flex;
   flex-direction: column;

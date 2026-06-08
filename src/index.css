@@ -10,6 +10,29 @@
   --shadow-subtle: 0 2px 16px rgba(0, 0, 0, 0.07);
 }
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
 /* Custom styles for animations, step indications, and map placeholders */
 .step-indicator {
   position: relative;
@@ -25,18 +48,4 @@ body {
   margin: 0;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: var(--color-brand-light);
-}
-::-webkit-scrollbar-thumb {
-  background: #cccccc;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-brand-primary);
-}
+

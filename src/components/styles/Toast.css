@@ -75,3 +75,16 @@
   background: #e5e7eb;
   opacity: 0.6;
 }
+
+@media (max-width: 640px) {
+  .toast-container {
+    left: 0.75rem;
+    right: 0.75rem;
+    width: auto;
+    max-width: none;
+  }
+
+  .toast-item {
+    min-width: 0;
+  }
+}

@@ -372,3 +372,25 @@
   color: #22c55e;
   flex-shrink: 0;
 }
+
+@media (max-width: 767px) {
+  .jd-breadcrumb-current {
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .jd-dossier-row {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .jd-dossier-label,
+  .jd-dossier-value {
+    width: 100%;
+    text-align: left;
+  }
+
+  .jd-apply-btn {
+    width: 100%;
+  }
+}

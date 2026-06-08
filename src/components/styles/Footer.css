@@ -5,6 +5,26 @@
   padding: 0 2.5rem;
 }
 
+@media (max-width: 639px) {
+  .footer {
+    padding: 0 1rem;
+  }
+
+  .footer-grid {
+    padding: 2rem 0 1.5rem;
+    gap: 1.75rem;
+  }
+
+  .footer-bottom {
+    padding: 1rem 0 1.5rem;
+    align-items: center;
+  }
+
+  .footer-badges {
+    justify-content: center;
+  }
+}
+
 /* ── Top orange brand bar ── */
 .footer-brand-bar {
   height: 3px;

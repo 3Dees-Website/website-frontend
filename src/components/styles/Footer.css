@@ -223,3 +223,9 @@
   border-radius: 20px;
   white-space: nowrap;
 }
+
+@media (max-width: 1023px) {
+  .footer-badges {
+    display: none;
+  }
+}

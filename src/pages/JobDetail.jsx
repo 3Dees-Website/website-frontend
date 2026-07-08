@@ -12,11 +12,44 @@ import './styles/JobDetail.css';
 
 export function JobDetail() {
   const { id } = useParams();
-  const { jobs } = useJobs();
+  const { jobs, isLoadingJobs } = useJobs();
 
-  const job = useMemo(() => {
-    return jobs.find((j) => j.id === id);
-  }, [jobs, id]);
+  // All hooks must run unconditionally before any early returns.
+  const job = useMemo(() => jobs.find((j) => j.id === id), [jobs, id]);
+
+  const formattedRequirements = useMemo(() => {
+    const reqs = job?.applicationRequirements;
+    if (!reqs) return [];
+    const list = [];
+    if (reqs.cvRequired)            list.push('CV / Professional Resume');
+    if (reqs.coverLetterRequired)   list.push('Cover Letter Statement');
+    if (reqs.academicCertRequired)  list.push('Academic Certificates / Degrees');
+    if (reqs.nyscCertRequired)      list.push('NYSC Discharge / Exemption Certificate');
+    if (reqs.passportPhotoRequired) list.push('Recent Passport Photograph (JPG/PNG)');
+    if (reqs.nationalIdRequired)    list.push('National Identity Verification (NIN Slip)');
+    if (reqs.dobRequired)           list.push('Proof of Date of Birth');
+    if (reqs.stateOfOriginRequired) list.push('State of Origin Verification');
+    if (reqs.lgaRequired)           list.push('LGA Endorsement documentation');
+    return list;
+  }, [job]);
+
+  const splitItems = (str) => {
+    if (!str) return [];
+    return str.split('\n').filter((item) => item.trim() !== '');
+  };
+
+  if (isLoadingJobs) {
+    return (
+      <div className="jd-loading" aria-live="polite">
+        <div className="jd-skeleton-card">
+          <div className="skeleton-line skeleton-line-short" />
+          <div className="skeleton-line skeleton-line-long" />
+          <div className="skeleton-line skeleton-line-medium" />
+          <div className="skeleton-line skeleton-line-long" />
+        </div>
+      </div>
+    );
+  }
 
   if (!job) {
     return (
@@ -32,31 +65,8 @@ export function JobDetail() {
     );
   }
 
-  const splitItems = (str) => {
-    if (!str) return [];
-    return str.split('\n').filter((item) => item.trim() !== '');
-  };
-
   const responsibilitiesList = splitItems(job.responsibilities);
   const requirementsList = splitItems(job.requirements);
-
-  const formattedRequirements = useMemo(() => {
-    const list = [];
-    const reqs = job.applicationRequirements;
-    if (!reqs) return [];
-
-    if (reqs.cvRequired)             list.push('CV / Professional Resume');
-    if (reqs.coverLetterRequired)    list.push('Cover Letter Statement');
-    if (reqs.academicCertRequired)   list.push('Academic Certificates / Degrees');
-    if (reqs.nyscCertRequired)       list.push('NYSC Discharge / Exemption Certificate');
-    if (reqs.passportPhotoRequired)  list.push('Recent Passport Photograph (JPG/PNG)');
-    if (reqs.nationalIdRequired)     list.push('National Identity Verification (NIN Slip)');
-    if (reqs.dobRequired)            list.push('Proof of Date of Birth');
-    if (reqs.stateOfOriginRequired)  list.push('State of Origin Verification');
-    if (reqs.lgaRequired)            list.push('LGA Endorsement documentation');
-
-    return list;
-  }, [job]);
 
   return (
     <motion.div

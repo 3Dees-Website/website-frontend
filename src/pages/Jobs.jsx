@@ -11,7 +11,7 @@ import { Search, MapPin, Briefcase, Calendar, RotateCcw, ChevronRight, Inbox } f
 import './styles/Jobs.css';
 
 export function Jobs() {
-  const { jobs } = useJobs();
+  const { jobs, isLoadingJobs } = useJobs();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -32,8 +32,10 @@ export function Jobs() {
   }, [jobs]);
 
   const types = useMemo(() => {
-    return ['All', 'Full-time', 'Part-time', 'Contract', 'Temporary'];
-  }, []);
+    const activeJobs = jobs.filter((j) => j.status === 'Active');
+    const set = new Set(activeJobs.map((j) => j.type));
+    return ['All', ...Array.from(set)];
+  }, [jobs]);
 
   const filteredJobs = useMemo(() => {
     return jobs.filter((job) => {
@@ -168,8 +170,19 @@ export function Jobs() {
 
       {/* Job Listings */}
       <div className="jobs-listings">
+        {isLoadingJobs && (
+          <div className="jobs-loading" aria-live="polite">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="job-card job-card-skeleton" aria-hidden="true">
+                <div className="skeleton-line skeleton-line-short" />
+                <div className="skeleton-line skeleton-line-long" />
+                <div className="skeleton-line skeleton-line-medium" />
+              </div>
+            ))}
+          </div>
+        )}
         <AnimatePresence mode="popLayout">
-          {filteredJobs.length > 0 ? (
+          {!isLoadingJobs && filteredJobs.length > 0 ? (
             <div className="jobs-grid" id="job-listing-container">
               {paginatedJobs.map((job) => (
                 <motion.div
@@ -229,7 +242,7 @@ export function Jobs() {
                 </motion.div>
               ))}
             </div>
-          ) : (
+          ) : !isLoadingJobs ? (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -247,7 +260,7 @@ export function Jobs() {
                 Clear Search & View All
               </button>
             </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
 
         {/* Load More */}

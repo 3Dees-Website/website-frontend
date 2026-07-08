@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { useToast } from '../hooks/useToast';
+import { contactService } from '../services/contactService';
 import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react';
 import './styles/Contact.css';
 
@@ -48,11 +49,15 @@ export function Contact() {
     }
 
     setIsSending(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    setForm({ fullName: '', email: '', phone: '', orgName: '', subject: '', message: '' });
-    setIsSending(false);
-    addToast('success', 'Inquiry Ingested', 'Your corporate brief has been successfully logged. Board experts will contact you.');
+    try {
+      await contactService.submit(form);
+      setForm({ fullName: '', email: '', phone: '', orgName: '', subject: '', message: '' });
+      addToast('success', 'Inquiry Ingested', 'Your corporate brief has been successfully logged. Board experts will contact you.');
+    } catch (err) {
+      addToast('error', 'Submission Failed', err.message || 'Could not send your message. Please try again.');
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (

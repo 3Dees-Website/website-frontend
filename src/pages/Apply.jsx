@@ -14,28 +14,13 @@ import './styles/Apply.css';
 
 export function Apply() {
   const { id } = useParams();
-  const { jobs } = useJobs();
+  const { jobs, isLoadingJobs } = useJobs();
   const { applyToJob } = useApplications();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
-  const job = useMemo(() => {
-    return jobs.find((j) => j.id === id);
-  }, [jobs, id]);
-
-  if (!job) {
-    return (
-      <div className="apply-not-found">
-        <h2 className="apply-not-found-title">Invalid Application Route</h2>
-        <p className="apply-not-found-desc">
-          The careers portal you are trying to access does not match any active recruitment workflows.
-        </p>
-        <Link to="/jobs" className="apply-not-found-btn">Browse Open Positions</Link>
-      </div>
-    );
-  }
-
-  const reqs = job.applicationRequirements;
+  // All hooks must be declared unconditionally before any early returns.
+  const job = useMemo(() => jobs.find((j) => j.id === id), [jobs, id]);
 
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
@@ -55,6 +40,28 @@ export function Apply() {
   const [documents, setDocuments] = useState({});
   const [declaration, setDeclaration] = useState(false);
   const [errors, setErrors] = useState({});
+
+  if (isLoadingJobs) {
+    return (
+      <div className="apply-not-found">
+        <p className="apply-not-found-desc">Loading vacancy details…</p>
+      </div>
+    );
+  }
+
+  if (!job) {
+    return (
+      <div className="apply-not-found">
+        <h2 className="apply-not-found-title">Invalid Application Route</h2>
+        <p className="apply-not-found-desc">
+          The careers portal you are trying to access does not match any active recruitment workflows.
+        </p>
+        <Link to="/jobs" className="apply-not-found-btn">Browse Open Positions</Link>
+      </div>
+    );
+  }
+
+  const reqs = job.applicationRequirements;
 
   const handleFileUpload = (field, e, allowedTypes, maxMb = 5) => {
     const file = e.target.files?.[0];
@@ -82,7 +89,13 @@ export function Apply() {
 
     setDocuments((prev) => ({
       ...prev,
-      [field]: { name: file.name, size: `${fileMb.toFixed(1)} MB`, type: file.type, url: URL.createObjectURL(file) }
+      [field]: {
+        name: file.name,
+        size: `${fileMb.toFixed(1)} MB`,
+        type: file.type,
+        url: URL.createObjectURL(file),
+        fileRef: file,   // actual File object for multipart API submission
+      },
     }));
 
     setErrors((prev) => {
@@ -160,15 +173,14 @@ export function Apply() {
       return;
     }
     setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
     try {
-      const referenceCode = applyToJob({
-        jobId: job.id, personalInfo, educationInfo, documents, statusHistory: []
+      const referenceCode = await applyToJob({
+        jobId: job.id, personalInfo, educationInfo, documents,
       });
       setRefId(referenceCode);
-      addToast('success', 'Workspace Saved', 'Your application file was initialized successfully.');
+      addToast('success', 'Application Submitted', 'Your application file was successfully transmitted.');
     } catch (err) {
-      addToast('error', 'Submission Issue', 'Could not save form file to database.');
+      addToast('error', 'Submission Failed', err.message || 'Could not submit your application. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

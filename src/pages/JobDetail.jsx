@@ -7,31 +7,44 @@ import { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useJobs } from '../hooks/useJobs';
-import { MapPin, Briefcase, Calendar, Clipboard, ShieldCheck, CheckCircle2, ChevronRight } from 'lucide-react';
+import { useFieldCatalog } from '../hooks/useFieldCatalog';
+import { MapPin, Briefcase, Calendar, Clipboard, ShieldCheck, CheckCircle2, Circle, ChevronRight } from 'lucide-react';
 import './styles/JobDetail.css';
 
 export function JobDetail() {
   const { id } = useParams();
   const { jobs, isLoadingJobs } = useJobs();
+  const { catalog } = useFieldCatalog();
 
   // All hooks must run unconditionally before any early returns.
   const job = useMemo(() => jobs.find((j) => j.id === id), [jobs, id]);
 
-  const formattedRequirements = useMemo(() => {
-    const reqs = job?.applicationRequirements;
-    if (!reqs) return [];
-    const list = [];
-    if (reqs.cvRequired)            list.push('CV / Professional Resume');
-    if (reqs.coverLetterRequired)   list.push('Cover Letter Statement');
-    if (reqs.academicCertRequired)  list.push('Academic Certificates / Degrees');
-    if (reqs.nyscCertRequired)      list.push('NYSC Discharge / Exemption Certificate');
-    if (reqs.passportPhotoRequired) list.push('Recent Passport Photograph (JPG/PNG)');
-    if (reqs.nationalIdRequired)    list.push('National Identity Verification (NIN Slip)');
-    if (reqs.dobRequired)           list.push('Proof of Date of Birth');
-    if (reqs.stateOfOriginRequired) list.push('State of Origin Verification');
-    if (reqs.lgaRequired)           list.push('LGA Endorsement documentation');
-    return list;
-  }, [job]);
+  // "What you'll need" checklist — generated from the job's per-field
+  // application_requirements config + catalog labels. Conditional sub-fields
+  // (the experience trio) are never independently listed in a job's config,
+  // so they never appear here on their own.
+  const checklist = useMemo(() => {
+    const empty = { requiredDocs: [], optionalDocs: [], requiredOther: [], optionalOther: [] };
+    if (!catalog || !job?.applicationRequirements) return empty;
+    const reqs = job.applicationRequirements;
+
+    return catalog.fields.reduce((acc, field) => {
+      if (field.conditionalOn) return acc;
+      const requirement = reqs[field.key];
+      if (!requirement) return acc;
+
+      if (field.type === 'file') {
+        (requirement === 'required' ? acc.requiredDocs : acc.optionalDocs).push(field.label);
+      } else {
+        (requirement === 'required' ? acc.requiredOther : acc.optionalOther).push(field.label);
+      }
+      return acc;
+    }, empty);
+  }, [catalog, job]);
+
+  const hasChecklist =
+    checklist.requiredDocs.length || checklist.optionalDocs.length ||
+    checklist.requiredOther.length || checklist.optionalOther.length;
 
   const splitItems = (str) => {
     if (!str) return [];
@@ -209,20 +222,53 @@ export function JobDetail() {
           </div>
 
           {/* Requirements checklist */}
-          {formattedRequirements.length > 0 && (
+          {hasChecklist > 0 && (
             <div className="jd-card jd-checklist">
               <h4 className="jd-checklist-title">Candidate Requirements Checklist</h4>
               <p className="jd-checklist-desc">
-                The administrative panel requires verified uploads of the following documents to process this specific portal:
+                This vacancy's application form asks for the following. Required items must be
+                provided to submit; optional items strengthen your dossier but won't block it.
               </p>
-              <ul className="jd-checklist-list">
-                {formattedRequirements.map((reqName) => (
-                  <li key={reqName} className="jd-checklist-item">
-                    <CheckCircle2 className="jd-check-icon" />
-                    <span>{reqName}</span>
-                  </li>
-                ))}
-              </ul>
+
+              {(checklist.requiredDocs.length > 0 || checklist.optionalDocs.length > 0) && (
+                <div className="jd-checklist-group">
+                  <h5 className="jd-checklist-group-title">Documents</h5>
+                  <ul className="jd-checklist-list">
+                    {checklist.requiredDocs.map((label) => (
+                      <li key={label} className="jd-checklist-item">
+                        <CheckCircle2 className="jd-check-icon" />
+                        <span>{label}</span>
+                      </li>
+                    ))}
+                    {checklist.optionalDocs.map((label) => (
+                      <li key={label} className="jd-checklist-item jd-checklist-item-optional">
+                        <Circle className="jd-check-icon jd-check-icon-optional" />
+                        <span>{label} <span className="jd-checklist-optional-tag">(Optional)</span></span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {(checklist.requiredOther.length > 0 || checklist.optionalOther.length > 0) && (
+                <div className="jd-checklist-group">
+                  <h5 className="jd-checklist-group-title">Other Information</h5>
+                  <ul className="jd-checklist-list">
+                    {checklist.requiredOther.map((label) => (
+                      <li key={label} className="jd-checklist-item">
+                        <CheckCircle2 className="jd-check-icon" />
+                        <span>{label}</span>
+                      </li>
+                    ))}
+                    {checklist.optionalOther.map((label) => (
+                      <li key={label} className="jd-checklist-item jd-checklist-item-optional">
+                        <Circle className="jd-check-icon jd-check-icon-optional" />
+                        <span>{label} <span className="jd-checklist-optional-tag">(Optional)</span></span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
         </div>

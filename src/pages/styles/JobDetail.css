@@ -373,6 +373,35 @@
   flex-shrink: 0;
 }
 
+.jd-checklist-group + .jd-checklist-group {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(229, 231, 235, 0.7);
+}
+
+.jd-checklist-group-title {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #9ca3af;
+  margin-bottom: 0.625rem;
+}
+
+.jd-checklist-item-optional {
+  color: #9ca3af;
+}
+
+.jd-check-icon-optional {
+  color: #d1d5db;
+}
+
+.jd-checklist-optional-tag {
+  font-size: 0.6rem;
+  color: #9ca3af;
+  font-weight: 400;
+}
+
 @media (max-width: 767px) {
   .jd-breadcrumb-current {
     max-width: 100%;

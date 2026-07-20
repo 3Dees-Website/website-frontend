@@ -52,19 +52,23 @@ No CSS framework — every page/component has a hand-written companion `.css` fi
 ├── eslint.config.js              # Flat ESLint config
 ├── .env                          # Local env values (gitignored) — VITE_API_BASE_URL, VITE_EGI_PORTAL_ENDPOINT
 ├── .gitignore
+├── docs/
+│   └── field-catalog-draft.md      # Draft canonical field catalog for the dynamic application form (pending review)
 ├── public/
 │   ├── 3dees_Logo.png             # Brand logo used in Navbar/Footer
-│   └── favicon.png                # Browser tab icon
+│   ├── favicon.png                # Browser tab icon
+│   └── favicon.ico                # Legacy favicon format (fallback)
 └── src/
     ├── main.jsx                   # React root bootstrap
     ├── App.jsx                    # Route table + public layout shell
     ├── App.css                    # Layout-level styles (public-base-layout/main)
     ├── index.css                  # Global reset, CSS custom properties (brand colors/fonts), body defaults
     ├── context/
-    │   └── PortalContext.jsx      # App-wide state: auth, jobs, applications, admins, audit logs, toasts
+    │   └── PortalContext.jsx      # App-wide state: auth, jobs, field catalog, applications, admins, audit logs, toasts
     ├── hooks/
     │   ├── useAuth.js              # Thin selector hook over PortalContext (auth slice)
     │   ├── useJobs.js              # Thin selector hook over PortalContext (jobs slice)
+    │   ├── useFieldCatalog.js       # Thin selector hook over PortalContext (field catalog slice)
     │   ├── useApplications.js      # Thin selector hook over PortalContext (applications/audit slice)
     │   └── useToast.js             # Thin selector hook over PortalContext (toast slice)
     ├── services/                   # axios-based API clients, one per resource
@@ -74,11 +78,15 @@ No CSS framework — every page/component has a hand-written companion `.css` fi
     │   ├── applicationsService.js   # Public multipart submit, admin list/review/bulk/export
     │   ├── contactService.js        # Public contact form submit
     │   ├── usersService.js          # Superadmin-only admin-user management
-    │   └── auditLogsService.js      # Audit log list + CSV export
+    │   ├── auditLogsService.js      # Audit log list + CSV export
+    │   └── fieldCatalogService.js   # Fetches + in-memory-caches the dynamic field catalog
+    ├── utils/
+    │   └── fieldCatalogHelpers.js   # Catalog-driven section/field visibility, validation, and derived-value helpers
     ├── components/                  # Reusable UI shared across pages
     │   ├── Navbar.jsx                # Top nav bar + mobile drawer + exports LogoSVG
     │   ├── Footer.jsx                # Site footer: about, quick links, services, contact, socials
     │   ├── Toast.jsx                 # ToastContainer + individual animated toast notifications
+    │   ├── FieldRenderer.jsx          # Renders one catalog field's input, by type, recursively for experience sub-fields
     │   └── styles/
     │       ├── Navbar.css
     │       ├── Footer.css
@@ -86,8 +94,8 @@ No CSS framework — every page/component has a hand-written companion `.css` fi
     └── pages/                        # One component per route
         ├── Home.jsx                  # Landing page: hero, stats, featured jobs, process steps
         ├── Jobs.jsx                   # Job listing with search/filter/pagination
-        ├── JobDetail.jsx               # Single job's full detail + requirements checklist
-        ├── Apply.jsx                   # 4-step application wizard with file uploads
+        ├── JobDetail.jsx               # Single job's full detail + catalog-driven requirements checklist
+        ├── Apply.jsx                   # Catalog-driven, per-job-section application wizard with file uploads
         ├── About.jsx                   # Company profile, mission, services, team, governance
         ├── Contact.jsx                  # Contact form + office info
         └── styles/
@@ -123,23 +131,24 @@ The single HTML page Vite serves. Just a `#root` div and a module script pointin
 ### State layer
 
 **`src/context/PortalContext.jsx`**
-The single source of truth for the whole app — a `useReducer`-based context provider. Holds: `currentUser`, `token`, `pendingAuthToken` (mid-OTP-flow), `jobs`, `isLoadingJobs`, `applications`, `admins`, `auditLogs`, `toasts`.
+The single source of truth for the whole app — a `useReducer`-based context provider. Holds: `currentUser`, `token`, `pendingAuthToken` (mid-OTP-flow), `jobs`, `isLoadingJobs`, `fieldCatalog`, `isLoadingCatalog`, `applications`, `admins`, `auditLogs`, `toasts`.
 
 On mount it:
 - Deletes legacy `localStorage` keys from a prior all-client-side prototype (`3dees_users`, `3dees_jobs`, `3dees_applications`, `3dees_audit_log`, `3dees_token`).
 - Rehydrates auth from `3dees_current_user` / `3dees_access_token` in `localStorage` if present, so a refresh doesn't log the user out.
 - Fetches public jobs via `jobsService.getJobs()` and populates `jobs`; shows an error toast if that fails; always flips `isLoadingJobs` to `false` in a `finally`.
+- Fetches the dynamic field catalog via `fieldCatalogService.getCatalog()` (no auth required, response cached by the service) and populates `fieldCatalog`; shows an error toast if that fails; always flips `isLoadingCatalog` to `false` in a `finally`.
 - Subscribes to a custom `auth:session-expired` window event (dispatched by `services/api.js` when a token refresh fails) and clears auth state + shows a warning toast when it fires.
 
 Exposes functions consumed through the `hooks/` selectors:
 - **Auth**: `login(email, password)` (step 1 → OTP triggered, returns `{pendingToken, destination}`), `verifyOtp(pendingToken, otpCode)` (step 2 → sets real tokens, persists them to `localStorage`, toasts a welcome message, and eagerly calls `loadAdminData()`), `logout()` (best-effort server-side revoke, always clears local tokens).
 - **Admin data loader**: `loadAdminData()` — parallel-fetches applications, admins, and audit logs after login; failure here is treated as non-fatal (dashboard would just show empty states).
 - **Jobs (admin)**: `postJob`, `editJob`, `removeJob` — call `jobsService`, dispatch reducer updates, and toast the result.
-- **Applications**: `applyToJob({jobId, personalInfo, educationInfo, documents})` — the public application submission. Splits `fullName` into first/last name, builds a `FormData` multipart payload mapping the wizard's field names to the API's expected shape, appends any attached `File` objects, and returns the server-issued `referenceId`. `reviewApplication` and `bulkReviewApplications` are admin actions that update status and refresh audit logs; approving an application also fires a toast implying an "EGI Portal sync" is queued (see `VITE_EGI_PORTAL_ENDPOINT`).
+- **Applications**: `applyToJob({jobId, answers, files})` — the public application submission. `answers` is a flat `{ [fieldKey]: string|boolean }` map covering every non-file catalog field the applicant answered (across whichever sections the job's `applicationRequirements` enabled) and `files` is `{ [fieldKey]: File | File[] }`. Builds one `FormData` multipart field per answer/file key — no JSON-blob wrapping — and returns the server-issued `referenceId`. `reviewApplication` and `bulkReviewApplications` are admin actions that update status and refresh audit logs; approving an application also fires a toast implying an "EGI Portal sync" is queued (see `VITE_EGI_PORTAL_ENDPOINT`).
 - **Admin users**: `registerAdmin`, `toggleAdminSuspension`, `resetAdminPass`, `removeAdmin` — superadmin user-management operations, all currently unreachable from the UI since the admin routes were removed.
 
-**`src/hooks/useAuth.js` / `useJobs.js` / `useApplications.js` / `useToast.js`**
-Each is a tiny wrapper: `useContext(PortalContext)`, throws if used outside `<PortalProvider>`, and returns a narrowed-down slice of the context (only the fields/functions relevant to that concern). This keeps page components from importing the raw context and picking fields ad hoc.
+**`src/hooks/useAuth.js` / `useJobs.js` / `useFieldCatalog.js` / `useApplications.js` / `useToast.js`**
+Each is a tiny wrapper: `useContext(PortalContext)`, throws if used outside `<PortalProvider>`, and returns a narrowed-down slice of the context (only the fields/functions relevant to that concern). `useFieldCatalog()` returns `{ catalog, isLoadingCatalog }`. This keeps page components from importing the raw context and picking fields ad hoc.
 
 ### Services (API layer)
 
@@ -158,6 +167,9 @@ Thin wrappers around `/auth/login`, `/auth/verify-otp`, `/auth/refresh`, `/auth/
 **`src/services/applicationsService.js`**
 `normalizeApplication` does the same snake_case→camelCase mapping for applications (`job_id`, `reference_id`, `personal_info`, `education_info`, `status_history`, `egi_sync_status`, `submitted_at`, …). `submitApplication(formData)` is the only public endpoint (multipart POST to `/applications`); everything else (`getApplications`, `exportApplications` as CSV blob, `getApplication`, `updateStatus`, `bulkUpdateStatus`) is admin-only, hitting `/admin/applications/*`.
 
+**`src/services/fieldCatalogService.js`**
+`getCatalog()` — `GET /field-catalog` (no auth). Memoizes the response in a module-level variable after the first successful call, and de-dupes concurrent calls behind a single in-flight promise, so the catalog is fetched once per page load no matter how many components ask for it (`PortalContext` on mount, plus any `Apply`/`JobDetail` instance via `useFieldCatalog()`).
+
 **`src/services/contactService.js`**
 One function, `submit({fullName, email, phone, orgName, subject, message})`, posting to `/contact`. `phone`/`orgName` are optional and stripped to `undefined` if blank rather than sent as empty strings.
 
@@ -166,6 +178,16 @@ Superadmin-only admin-account management: `getUsers`, `createUser`, `toggleStatu
 
 **`src/services/auditLogsService.js`**
 `getLogs` (list, with optional `search`/`status`/`officer` filters) and `exportLogs` (CSV blob) against `/admin/audit-logs*`. Normalizes each log entry (`application_id`, `applicant_name`, `job_title`, `prev_status`, `new_status`, `changed_by`, `timestamp`).
+
+### Utils
+
+**`src/utils/fieldCatalogHelpers.js`**
+Client-side helpers meant to mirror a `src/config/fieldCatalog.js` + submission validator on the backend (the backend stays authoritative; this only drives wizard UX and gives friendly per-field errors before a round trip). Exposes:
+- `deriveFullName` / `deriveAge` — computed from `firstName`/`middleName`/`lastName` and `dateOfBirth` rather than asked as their own inputs (a typed age could contradict the DOB; a computed one can't).
+- `getEnabledSections(catalog, applicationRequirements)` — which catalog sections a given job's config turns on, in catalog order; drives the Apply wizard's step list.
+- `getVisibleSectionFields` / `getSubfieldsOf` — which fields render for one step, including an experience-trio's Years/Detail/Proof sub-fields, which only appear once their `yesno` parent is enabled for the job *and* answered "Yes" (they're never independently listed in a job's requirements).
+- `validateFieldValue` / `validateFile` / `validateSectionFields` — per-type format validation (email/tel/date/number/year/select/yesno) plus required/file/declaration checks for a whole step.
+- `formatAnswerForReview` — human-readable value for the Review step.
 
 ### Components
 
@@ -178,6 +200,9 @@ Four-column footer: brand blurb + social links (LinkedIn/X/Facebook — currentl
 **`src/components/Toast.jsx`**
 `ToastContainer` reads `toasts` from `useToast()` and renders a `ToastItem` per entry inside an `AnimatePresence`. Each toast auto-dismisses after 4 seconds via `setTimeout`, has a type-specific icon/border color (`success`/`error`/`info`, defaulting to `info`), a manual close button, and an animated progress bar that shrinks over the 4-second window.
 
+**`src/components/FieldRenderer.jsx`**
+Renders a single catalog field's input control, driven entirely by `field.type` (`text`/`tel`/`email`, `textarea`, `number`/`year`, `date` — with a live computed-age preview beside `dateOfBirth` — `select` — with a dependent State-of-Origin→LGA dropdown that falls back to free text if the LGA list isn't known — `yesno`, `declaration`, `file`). Recurses to render an experience-trio's Years/Detail/Proof sub-fields, animated in/out via `AnimatePresence`, directly beneath a "Yes"-answered `yesno` field. `file` fields support single or (for `otherDocsUpload`) multiple attachments with a max-count cap, client-side MIME/size validation, and per-file removal.
+
 ### Pages
 
 **`src/pages/Home.jsx`**
@@ -187,10 +212,10 @@ The landing page. Sections, top to bottom: animated hero (headline, description,
 The job board. Pulls `jobs`/`isLoadingJobs` from `useJobs()`. Client-side filtering only (no server-side query params sent) by: free-text search (matches title/clientOrg/description), category, location (matched against the first word of the job's location string, e.g. state name), and employment type — all derived as dropdown option sets from the currently-loaded active jobs via `useMemo`. Pagination is "load more" style: starts at 6 visible, +4 per click. Shows 3 skeleton cards while loading, and a dedicated empty state (with a "Clear Search & View All" reset) when filters match nothing.
 
 **`src/pages/JobDetail.jsx`**
-Single job view keyed by the `:id` route param, looked up client-side from the already-loaded `jobs` array (no separate detail fetch). Renders a loading skeleton while jobs are loading, a "Vacancy Not Found" state if the ID doesn't match, and otherwise: header card (category, title, org, location/type/deadline), overview, responsibilities and requirements (each split from a newline-delimited string field), a static benefits blurb, and a sidebar with a "Recruitment Dossier" summary (salary, openings, closing date, a hardcoded "3DEES Garki II" vetting agent) plus a dynamically-built checklist of required documents derived from the job's `applicationRequirements` object (CV, cover letter, academic cert, NYSC cert, passport photo, national ID, DOB, state of origin, LGA).
+Single job view keyed by the `:id` route param, looked up client-side from the already-loaded `jobs` array (no separate detail fetch). Renders a loading skeleton while jobs are loading, a "Vacancy Not Found" state if the ID doesn't match, and otherwise: header card (category, title, org, location/type/deadline), overview, responsibilities and requirements (each split from a newline-delimited string field), a static benefits blurb, and a sidebar with a "Recruitment Dossier" summary (salary, openings, closing date, a hardcoded "3DEES Garki II" vetting agent) plus a "Candidate Requirements Checklist" built from `useFieldCatalog()` — every non-conditional catalog field enabled in the job's `applicationRequirements` is bucketed into required/optional documents and required/optional "other information", labelled straight from the catalog rather than a hardcoded list, so the checklist automatically covers whatever fields an admin turns on for that job.
 
 **`src/pages/Apply.jsx`**
-The application wizard, also keyed by `:id`. Four steps with a `motion`-animated slide transition between them (direction-aware — forward slides one way, back slides the other): **1. Bio-Data** (name, email, phone, gender, residential address always; DOB/state-of-origin/LGA conditionally required per `job.applicationRequirements`), **2. Education** (qualification, institution, graduation year, work summary always; years of experience/current employer conditionally required), **3. Documents** (per-requirement file upload blocks with client-side type/size validation — 5MB cap, extension or MIME allowlist per field — that store the file as `{name, size, type, url: objectURL, fileRef: File}`), **4. Review** (read-only recap of everything entered + attached files, plus a mandatory legal declaration checkbox). `validateStep()` re-validates the current step's fields before allowing `handleNext()` to advance. On final submit, calls `applyToJob()` from `useApplications()`; on success shows a confirmation screen with the server-issued reference code and a "Back to Open Positions" button; on failure toasts the error message and lets the user retry.
+The application wizard, also keyed by `:id`, entirely driven by the field catalog rather than a fixed 4-step shape. `getEnabledSections(catalog, job.applicationRequirements)` decides which catalog sections (Personal, Job Info, Employment, Education, Documents, Professional, Referees, Declarations, Role-Specific — whichever ones the job's config turns on) become wizard steps, in catalog order, plus a trailing Review step. Each step renders its visible fields via `<FieldRenderer>`, with a `motion`-animated slide transition between steps (direction-aware — forward slides one way, back slides the other). `validateStep()` (from `fieldCatalogHelpers`) re-validates the current step's visible fields before `handleNext()` advances; `handleSubmit` also re-validates every step defensively in case the applicant backtracked. Building the submission payload re-walks every enabled section's visible fields so conditional experience sub-fields are only included if their `yesno` parent was answered "Yes". On success, calls `applyToJob({jobId, answers, files})` from `useApplications()` and shows a confirmation screen with the server-issued reference code; on failure toasts the error message and lets the user retry.
 
 **`src/pages/About.jsx`**
 Static company-profile page: hero banner; a two-column "Corporate Identity" section (mission/core-value cards + a "Vetting Code" widget listing the 3-step verification process — NIN check, academic verification, NYSC records validation); a 4-card services grid (Recruitment & Staffing, Workforce Planning, HR Consulting, Mass Recruitment); a governance/charter section with a compliance checklist and a "Charter Vetted" badge; a 4-person leadership team grid (currently photo **placeholders** — camera icon + initials overlay, with an inline comment showing how to swap in a real `<img>` per person); and a closing CTA strip linking to `/contact`.
@@ -225,7 +250,7 @@ PortalProvider (context/PortalContext.jsx)
    │
    └─ exposes: state + action functions via Context
 
-hooks/useAuth.js, useJobs.js, useApplications.js, useToast.js
+hooks/useAuth.js, useJobs.js, useFieldCatalog.js, useApplications.js, useToast.js
    │  (each just useContext + pick relevant fields)
    ▼
 pages/*.jsx  ← call hook functions, render state, no direct axios/localStorage access
@@ -299,7 +324,7 @@ npm run preview    # serve the production build locally
 npm run lint        # ESLint
 ```
 
-The app expects a backend running at `localhost:3000` (or whatever `VITE_API_BASE_URL` points to) implementing the routes below — without it, jobs won't load (an error toast fires) and every form submission will fail.
+The app expects a backend running at `localhost:3000` (or whatever `VITE_API_BASE_URL` points to) implementing the routes below — without it, jobs and the field catalog won't load (error toasts fire for each) and every form submission will fail.
 
 ---
 
@@ -310,7 +335,8 @@ Inferred from the service layer — this is what a compatible backend must expos
 **Public**
 - `GET /api/jobs` — list active jobs (`?search&category&location&type`)
 - `GET /api/jobs/:id`
-- `POST /api/applications` — multipart form: `jobId`, `personalInfo` (JSON string), `educationInfo` (JSON string), plus file fields `cv`, `coverLetter`, `academicCert`, `nyscCert`, `passportPhoto`, `nationalId` as attached
+- `GET /api/field-catalog` — the dynamic field catalog: `{ sections, fields, mandatoryKeys, lgasByState }` (see [docs/field-catalog-draft.md](docs/field-catalog-draft.md) for the proposed field-by-field shape). Cached client-side after first fetch by `fieldCatalogService`.
+- `POST /api/applications` — multipart form: `jobId`, plus one multipart field per catalog key the applicant answered (e.g. `firstName`, `email`, `dateOfBirth`, `cvUpload`, …) — no JSON-blob fields; which keys are sent depends entirely on the job's `applicationRequirements` config
 - `POST /api/contact` — `{ fullName, email, phone?, orgName?, subject, message }`
 
 **Auth**
@@ -347,8 +373,9 @@ Chronological summary of what's been built, from `git log`:
    - Alongside the public pages: `Home`, `Jobs`, `JobDetail`, `Apply`, `About`, `Contact`, plus `Navbar`, `Footer`, `Toast`
 3. **Polish pass** — `motion`-based animations (Navbar scroll/drawer, About page transitions, Toast progress bars), `lucide-react`/`react-icons` icon adoption, responsive-layout fixes, About page team section rewritten with photo placeholders, Contact page's map block commented out.
 4. **Admin portal removed from this repo** (commit `46735e0`) — all Admin*/Superadmin* pages, `AdminLayout`, `ProtectedRoute`, and their CSS were deleted (~6,500 lines), along with the corresponding routes in `App.jsx` and the admin-specific Navbar logic. This site became public-only.
-5. **Real backend integration** (commit `6dca174`, current `HEAD`) — `localStorageDb.js` deleted; `services/` added (`api.js`, `authService.js`, `jobsService.js`, `applicationsService.js`, `contactService.js`, `usersService.js`, `auditLogsService.js`); `PortalContext` rewritten to call the API instead of reading/writing `localStorage` directly, with two-step OTP login and silent token refresh. See `.claude memory` note `project_api_integration.md` for the session this happened in.
-6. Small fixes since: Vercel SPA rewrite config, mobile footer-badge visibility.
+5. **Real backend integration** (commit `6dca174`) — `localStorageDb.js` deleted; `services/` added (`api.js`, `authService.js`, `jobsService.js`, `applicationsService.js`, `contactService.js`, `usersService.js`, `auditLogsService.js`); `PortalContext` rewritten to call the API instead of reading/writing `localStorage` directly, with two-step OTP login and silent token refresh. See `.claude memory` note `project_api_integration.md` for the session this happened in.
+6. Small fixes: Vercel SPA rewrite config, mobile footer-badge visibility.
+7. **Dynamic job application requirements** (commit `939a1c9`, current `HEAD`) — replaced the old fixed 4-step Apply wizard (hardcoded Bio-Data/Education/Documents/Review fields, `personalInfo`/`educationInfo` JSON blobs) with a field-catalog-driven system: `fieldCatalogService`/`useFieldCatalog` fetch and cache a canonical field catalog from the backend; `fieldCatalogHelpers` derives which sections/fields a job's `applicationRequirements` config enables and validates them; `FieldRenderer` renders any catalog field by type; `Apply.jsx` and `JobDetail.jsx`'s requirements checklist were both rewritten against this catalog instead of a hardcoded field list. `docs/field-catalog-draft.md` is the working draft of that catalog, with open items still flagged for review (derived vs. input fields, duplicate fields across sections, experience-field shape) — it isn't locked yet, so the backend's actual catalog may still change shape.
 
 **Why the admin portal was removed rather than kept:** the codebase and commit history don't state a reason explicitly, but the context strongly suggests the plan moved to a *separate* admin frontend backed by its own dedicated auth service — a sibling project, `egi-admin-portal` (see the `EGI Hub Backend` directory), describes itself as "a standalone authentication backend... so that a separate admin frontend can register a superadmin, log in, and maintain a session, independent of any other EGI backend service." That backend currently only handles auth (register/login/logout/me) and doesn't yet expose jobs/applications/users/audit-log endpoints, so it is **not** a drop-in replacement for the API this site's `services/` layer already expects — it appears to be an earlier or parallel piece of a still-being-built separate admin system, not the backend this site is currently pointed at.
 
@@ -362,4 +389,6 @@ Chronological summary of what's been built, from `git log`:
 - **Contact page map** is fully built (SVG grid, animated pin, GPS badge) but commented out, not deleted — a real map was decided against for now.
 - **`VITE_EGI_PORTAL_ENDPOINT`** is declared in `.env` and referenced conceptually (the "Client Sync Queued" toast on application approval) but never actually fetched from the frontend — that sync is assumed to happen server-side.
 - **Jobs/Apply pages filter and validate entirely client-side** against the already-fetched job list; there's no server-side search/pagination even though `jobsService.getJobs()` accepts `search`/`category`/`location`/`type` params (they're just never passed from the UI).
+- **Field catalog isn't locked yet.** `docs/field-catalog-draft.md` still has open review flags (e.g. whether Full Name/Age are derived vs. input fields, a duplicated Professional Registration Number field, whether §9 experience fields need years/detail beyond yes/no) — until it's finalized as the backend's real `GET /api/field-catalog` response, the Apply wizard and JobDetail checklist are only as correct as that draft.
+- **No client-side `src/config/fieldCatalog.js` exists** — the frontend has no fallback catalog; `Apply`/`JobDetail` show an explicit "form unavailable" state if `GET /api/field-catalog` fails or the backend hasn't implemented it yet.
 - No test suite exists (no `*.test.js`/`*.spec.js` files, no test runner in `package.json`).

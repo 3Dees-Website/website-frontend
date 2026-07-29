@@ -515,17 +515,29 @@
 }
 
 .team-grid {
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 1.5rem;
 }
 
-@media (min-width: 640px) {
-  .team-grid { grid-template-columns: repeat(2, 1fr); }
+/* Below desktop, row groups don't exist in the box tree — cards flow
+   as one continuous centered group so 2-per-row/1-per-row isn't split
+   by the top/bottom grouping. */
+.team-row {
+  display: contents;
 }
 
 @media (min-width: 1024px) {
-  .team-grid { grid-template-columns: repeat(4, 1fr); }
+  /* At desktop the split becomes real: each row group is its own
+     centered flex row, stacked via the grid's own gap. */
+  .team-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    flex: 0 0 100%;
+  }
 }
 
 /* Team card */
@@ -536,7 +548,16 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  flex: 0 1 100%;
   transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+@media (min-width: 640px) {
+  .team-card { flex-basis: calc((100% - 1.5rem) / 2); }
+}
+
+@media (min-width: 1024px) {
+  .team-card { flex-basis: calc((100% - 3rem) / 3); }
 }
 
 .team-card:hover {

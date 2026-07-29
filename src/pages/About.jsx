@@ -29,7 +29,44 @@ export function About() {
       bio: 'Coordinates digital sync pipelines with client databases and partner organizations.',
       initials: 'AN',
     },
+    {
+      name: 'Board Member',
+      role: 'Role TBD',
+      bio: 'Profile details to be added.',
+      initials: 'BM',
+    },
   ];
+
+  const topCount = team.length % 3 || 3;
+  const topTeam = team.slice(0, topCount);
+  const bottomTeam = team.slice(topCount);
+
+  const renderTeamCard = (t, idx) => (
+    <motion.div
+      key={t.name}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: idx * 0.1, duration: 0.4 }}
+      className="team-card"
+    >
+      {/* Photo area — swap src when you have real photos */}
+      <div className="team-photo-wrap">
+        <div className="team-photo-placeholder">
+          <Camera size={20} className="team-camera-icon" />
+          <span className="team-initials-overlay">{t.initials}</span>
+        </div>
+        {/* To add a real photo, replace the div above with:
+            <img src="/path/to/photo.jpg" alt={t.name} className="team-photo-img" />
+        */}
+      </div>
+      <div className="team-card-body">
+        <h4 className="team-name">{t.name}</h4>
+        <span className="team-role">{t.role}</span>
+        <p className="team-bio">{t.bio}</p>
+      </div>
+    </motion.div>
+  );
 
   const services = [
     {
@@ -219,32 +256,12 @@ export function About() {
             </p>
           </div>
           <div className="team-grid">
-            {team.map((t, idx) => (
-              <motion.div
-                key={t.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1, duration: 0.4 }}
-                className="team-card"
-              >
-                {/* Photo area — swap src when you have real photos */}
-                <div className="team-photo-wrap">
-                  <div className="team-photo-placeholder">
-                    <Camera size={20} className="team-camera-icon" />
-                    <span className="team-initials-overlay">{t.initials}</span>
-                  </div>
-                  {/* To add a real photo, replace the div above with:
-                      <img src="/path/to/photo.jpg" alt={t.name} className="team-photo-img" />
-                  */}
-                </div>
-                <div className="team-card-body">
-                  <h4 className="team-name">{t.name}</h4>
-                  <span className="team-role">{t.role}</span>
-                  <p className="team-bio">{t.bio}</p>
-                </div>
-              </motion.div>
-            ))}
+            <div className="team-row">
+              {topTeam.map((t, idx) => renderTeamCard(t, idx))}
+            </div>
+            <div className="team-row">
+              {bottomTeam.map((t, i) => renderTeamCard(t, topCount + i))}
+            </div>
           </div>
         </div>
       </section>

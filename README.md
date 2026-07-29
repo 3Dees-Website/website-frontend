@@ -57,7 +57,8 @@ No CSS framework — every page/component has a hand-written companion `.css` fi
 ├── public/
 │   ├── 3dees_Logo.png             # Brand logo used in Navbar/Footer
 │   ├── favicon.png                # Browser tab icon
-│   └── favicon.ico                # Legacy favicon format (fallback)
+│   ├── favicon.ico                # Legacy favicon format (fallback)
+│   └── _redirects                 # Netlify-style SPA rewrite ("/* /index.html 200"), redundant with vercel.json's rewrite on Vercel
 └── src/
     ├── main.jsx                   # React root bootstrap
     ├── App.jsx                    # Route table + public layout shell
@@ -233,6 +234,8 @@ Each page/component has a dedicated CSS file scoped by class-name prefix (e.g. e
 
 **`vercel.json`** — one rewrite rule (`"/(.*)" → "/index.html"`) so that deep-linking to e.g. `/jobs/42` on Vercel doesn't 404 — the SPA's router handles the path client-side after `index.html` loads.
 
+**`public/_redirects`** — the Netlify-equivalent SPA rewrite (`/* /index.html 200`). Vite copies it into `dist/` unchanged since anything in `public/` is served as-is. Only takes effect on Netlify; harmless (and unread) on Vercel, which relies on `vercel.json` instead. Its presence suggests Netlify was being evaluated as an alternate/backup host alongside Vercel.
+
 **`eslint.config.js`** — flat-config ESLint setup with the React Hooks and React Refresh plugins; run via `npm run lint`.
 
 **`.env`** (gitignored) — see [Environment variables](#environment-variables).
@@ -359,6 +362,8 @@ A 401 response with `{ error: 'TokenExpired' }` triggers the frontend's silent-r
 
 Hosted on **Vercel**. `vercel.json` rewrites every path to `/index.html` so client-side routes resolve correctly on a hard refresh/direct link. In production, `VITE_API_BASE_URL` must be set to the real API domain (e.g. `https://api.3dees.com`) since there is no dev proxy in production.
 
+A `public/_redirects` file is also present, which is the equivalent SPA rewrite for **Netlify**. It has no effect on Vercel; it just means the `dist/` build is deployable as-is to either host without extra config.
+
 ---
 
 ## History
@@ -375,7 +380,8 @@ Chronological summary of what's been built, from `git log`:
 4. **Admin portal removed from this repo** (commit `46735e0`) — all Admin*/Superadmin* pages, `AdminLayout`, `ProtectedRoute`, and their CSS were deleted (~6,500 lines), along with the corresponding routes in `App.jsx` and the admin-specific Navbar logic. This site became public-only.
 5. **Real backend integration** (commit `6dca174`) — `localStorageDb.js` deleted; `services/` added (`api.js`, `authService.js`, `jobsService.js`, `applicationsService.js`, `contactService.js`, `usersService.js`, `auditLogsService.js`); `PortalContext` rewritten to call the API instead of reading/writing `localStorage` directly, with two-step OTP login and silent token refresh. See `.claude memory` note `project_api_integration.md` for the session this happened in.
 6. Small fixes: Vercel SPA rewrite config, mobile footer-badge visibility.
-7. **Dynamic job application requirements** (commit `939a1c9`, current `HEAD`) — replaced the old fixed 4-step Apply wizard (hardcoded Bio-Data/Education/Documents/Review fields, `personalInfo`/`educationInfo` JSON blobs) with a field-catalog-driven system: `fieldCatalogService`/`useFieldCatalog` fetch and cache a canonical field catalog from the backend; `fieldCatalogHelpers` derives which sections/fields a job's `applicationRequirements` config enables and validates them; `FieldRenderer` renders any catalog field by type; `Apply.jsx` and `JobDetail.jsx`'s requirements checklist were both rewritten against this catalog instead of a hardcoded field list. `docs/field-catalog-draft.md` is the working draft of that catalog, with open items still flagged for review (derived vs. input fields, duplicate fields across sections, experience-field shape) — it isn't locked yet, so the backend's actual catalog may still change shape.
+7. **Dynamic job application requirements** (commit `939a1c9`) — replaced the old fixed 4-step Apply wizard (hardcoded Bio-Data/Education/Documents/Review fields, `personalInfo`/`educationInfo` JSON blobs) with a field-catalog-driven system: `fieldCatalogService`/`useFieldCatalog` fetch and cache a canonical field catalog from the backend; `fieldCatalogHelpers` derives which sections/fields a job's `applicationRequirements` config enables and validates them; `FieldRenderer` renders any catalog field by type; `Apply.jsx` and `JobDetail.jsx`'s requirements checklist were both rewritten against this catalog instead of a hardcoded field list. `docs/field-catalog-draft.md` is the working draft of that catalog, with open items still flagged for review (derived vs. input fields, duplicate fields across sections, experience-field shape) — it isn't locked yet, so the backend's actual catalog may still change shape.
+8. **README sync + Netlify redirect rule** (commits `d1c5c65`, `063087e`, current `HEAD`) — README updated to fully document the field-catalog work above, and `public/_redirects` added for Netlify-compatible SPA routing alongside the existing `vercel.json` rewrite.
 
 **Why the admin portal was removed rather than kept:** the codebase and commit history don't state a reason explicitly, but the context strongly suggests the plan moved to a *separate* admin frontend backed by its own dedicated auth service — a sibling project, `egi-admin-portal` (see the `EGI Hub Backend` directory), describes itself as "a standalone authentication backend... so that a separate admin frontend can register a superadmin, log in, and maintain a session, independent of any other EGI backend service." That backend currently only handles auth (register/login/logout/me) and doesn't yet expose jobs/applications/users/audit-log endpoints, so it is **not** a drop-in replacement for the API this site's `services/` layer already expects — it appears to be an earlier or parallel piece of a still-being-built separate admin system, not the backend this site is currently pointed at.
 

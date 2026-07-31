@@ -206,10 +206,6 @@ export function JobDetail() {
                   {new Date(job.closingDate).toLocaleDateString()}
                 </span>
               </div>
-              <div className="jd-dossier-row">
-                <span className="jd-dossier-label">Vetting Agent</span>
-                <span className="jd-dossier-value">3DEES Garki II</span>
-              </div>
             </div>
 
             <Link

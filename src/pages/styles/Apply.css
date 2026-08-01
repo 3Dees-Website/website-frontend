@@ -224,6 +224,7 @@
 /* ── Form Side ── */
 .apply-form-side {
   flex: 1;
+  min-width: 0;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -238,8 +239,11 @@
   border: 1px solid rgba(243,244,246,0.5);
   box-shadow: var(--shadow-subtle);
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  justify-content: flex-start;
   align-items: center;
+  row-gap: 0.75rem;
+  column-gap: 1.5rem;
 }
 
 @media (min-width: 768px) {
@@ -248,6 +252,7 @@
 
 .apply-step-item {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: 0.5rem;
 }
@@ -343,7 +348,7 @@
 .apply-fields-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 @media (min-width: 768px) {
@@ -522,17 +527,21 @@
   margin-bottom: 0.5rem;
 }
 
-.apply-docs-grid {
+.apply-file-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
   gap: 1.25rem;
 }
 
 @media (min-width: 768px) {
-  .apply-docs-grid { grid-template-columns: repeat(2, 1fr); }
+  .apply-file-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 .apply-doc-block {
+  min-width: 0;
+  min-height: 6.5rem;
+  height: 100%;
   padding: 1rem;
   border-radius: 0.375rem;
   border: 1px solid rgba(229,231,235,0.5);
@@ -540,6 +549,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  box-sizing: border-box;
 }
 
 .apply-doc-label {
@@ -594,10 +604,18 @@
 }
 
 .apply-doc-name {
+  flex: 1;
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   font-weight: 600;
+}
+
+.apply-doc-size {
+  flex-shrink: 0;
+  white-space: nowrap;
+  color: #15803d;
 }
 
 .apply-doc-none {
@@ -693,6 +711,7 @@
 
 /* Declaration */
 .apply-declaration {
+  grid-column: 1 / -1;
   background-color: rgba(254,242,242,0.7);
   border: 1px solid #fee2e2;
   padding: 1rem;

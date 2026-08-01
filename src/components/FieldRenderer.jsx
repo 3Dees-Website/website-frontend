@@ -287,9 +287,8 @@ export function FieldRenderer({
               {currentList.map((file, idx) => (
                 <div key={`${file.name}-${idx}`} className="apply-doc-attached">
                   <FileCheck className="apply-doc-check" />
-                  <span className="apply-doc-name">
-                    {file.name} ({(file.size / (1024 * 1024)).toFixed(1)} MB)
-                  </span>
+                  <span className="apply-doc-name" title={file.name}>{file.name}</span>
+                  <span className="apply-doc-size">({(file.size / (1024 * 1024)).toFixed(1)}MB)</span>
                   <button
                     type="button"
                     className="apply-doc-remove"

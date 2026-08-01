@@ -304,10 +304,12 @@ export function Apply() {
                           </div>
                         )}
 
-                        <div className="apply-fields-grid">
-                          {getVisibleSectionFields(catalog, currentStep.key, reqs, answers)
-                            .filter((field) => !field.conditionalOn) // subfields render recursively inside their yesno parent
-                            .map((field) => (
+                        {(() => {
+                          const visibleFields = getVisibleSectionFields(catalog, currentStep.key, reqs, answers)
+                            .filter((field) => !field.conditionalOn); // subfields render recursively inside their yesno parent
+                          const fileFields = visibleFields.filter((f) => f.type === 'file');
+                          const otherFields = visibleFields.filter((f) => f.type !== 'file');
+                          const renderField = (field) => (
                             <FieldRenderer
                               key={field.key}
                               field={field}
@@ -322,8 +324,22 @@ export function Apply() {
                               onFileRemoveAt={handleFileRemoveAt}
                               addToast={addToast}
                             />
-                          ))}
-                        </div>
+                          );
+                          return (
+                            <>
+                              {otherFields.length > 0 && (
+                                <div className="apply-fields-grid">
+                                  {otherFields.map(renderField)}
+                                </div>
+                              )}
+                              {fileFields.length > 0 && (
+                                <div className="apply-file-grid">
+                                  {fileFields.map(renderField)}
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
                     )}
 

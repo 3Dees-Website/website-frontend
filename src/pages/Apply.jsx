@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { useJobs } from '../hooks/useJobs';
@@ -41,6 +41,11 @@ export function Apply() {
   const [direction, setDirection] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [refId, setRefId] = useState(null);
+  const activeStepRef = useRef(null);
+
+  useEffect(() => {
+    activeStepRef.current?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }, [step]);
 
   const [answers, setAnswers] = useState({});
   const [files, setFiles] = useState({});
@@ -266,7 +271,11 @@ export function Apply() {
             {/* Step Indicator */}
             <div className="apply-steps-bar">
               {steps.map((st, idx) => (
-                <div key={st.key} className="apply-step-item">
+                <div
+                  key={st.key}
+                  className="apply-step-item"
+                  ref={step === idx ? activeStepRef : null}
+                >
                   <div className={`apply-step-circle ${step >= idx ? 'apply-step-active' : 'apply-step-inactive'}`}>
                     {step > idx ? <Check className="apply-step-check" /> : idx + 1}
                   </div>

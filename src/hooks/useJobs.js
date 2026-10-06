@@ -9,8 +9,5 @@ export function useJobs() {
   return {
     jobs: context.jobs,
     isLoadingJobs: context.isLoadingJobs,
-    postJob: context.postJob,
-    editJob: context.editJob,
-    removeJob: context.removeJob,
   };
 }

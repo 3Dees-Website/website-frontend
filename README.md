@@ -2,7 +2,7 @@
 
 Public-facing marketing and recruitment site for **3DEES Consulting Works** (RC: 9160527), a Nigerian workforce-solutions and recruitment firm based in Abuja. The site lets visitors browse job vacancies, apply to them with a multi-step form and document uploads, read about the company, and send business inquiries.
 
-It is a React 19 + Vite single-page app. It has **no admin/login UI of its own anymore** — an earlier admin & superadmin portal (dashboards, job management, application review, audit trail, user management) was built directly into this app and then deliberately removed (see [History](#history) below) once the plan shifted to a separate admin frontend talking to its own backend. The data layer (`PortalContext` + service modules) still contains the admin operations, wired to a REST API, in case that portal is reintroduced here — but no route currently renders them.
+It is a React 19 + Vite single-page app. It has **no admin/login UI of its own anymore** — an earlier admin & superadmin portal (dashboards, job management, application review, audit trail, user management) was built directly into this app and then deliberately removed (see [History](#history) below) once the plan shifted to a separate admin frontend (the `3DEES_admin` repo). The leftover admin data layer (auth, admin services, admin context actions) has since been removed too, so this site only talks to public endpoints and never reads or writes auth storage.
 
 ---
 
@@ -30,7 +30,7 @@ It is a React 19 + Vite single-page app. It has **no admin/login UI of its own a
 | UI framework | `react` / `react-dom` 19 | Function components + hooks only |
 | Build tool | `vite` 8 | Dev server, HMR, production bundling |
 | Routing | `react-router-dom` 7 | `BrowserRouter`, nested layout routes |
-| HTTP client | `axios` | Single configured instance with interceptors |
+| HTTP client | `axios` | Single configured instance with an error-normalizing interceptor |
 | Animation | `motion` (Framer Motion's successor package) | Page transitions, drawer/menu animation, counters, toasts |
 | Icons | `lucide-react`, `react-icons` | Line icons; `react-icons` used only for brand social icons (LinkedIn/X/Facebook) |
 | Linting | `eslint` 10 + `eslint-plugin-react-hooks` + `eslint-plugin-react-refresh` | `npm run lint` |
@@ -65,21 +65,17 @@ No CSS framework — every page/component has a hand-written companion `.css` fi
     ├── App.css                    # Layout-level styles (public-base-layout/main)
     ├── index.css                  # Global reset, CSS custom properties (brand colors/fonts), body defaults
     ├── context/
-    │   └── PortalContext.jsx      # App-wide state: auth, jobs, field catalog, applications, admins, audit logs, toasts
+    │   └── PortalContext.jsx      # App-wide state: jobs, field catalog, toasts + the applyToJob action
     ├── hooks/
-    │   ├── useAuth.js              # Thin selector hook over PortalContext (auth slice)
     │   ├── useJobs.js              # Thin selector hook over PortalContext (jobs slice)
     │   ├── useFieldCatalog.js       # Thin selector hook over PortalContext (field catalog slice)
-    │   ├── useApplications.js      # Thin selector hook over PortalContext (applications/audit slice)
+    │   ├── useApplications.js      # Thin selector hook over PortalContext (applyToJob)
     │   └── useToast.js             # Thin selector hook over PortalContext (toast slice)
     ├── services/                   # axios-based API clients, one per resource
-    │   ├── api.js                   # Shared axios instance: base URL, auth header injection, silent token refresh
-    │   ├── authService.js           # login (OTP step 1) / verifyOtp (step 2) / refresh / logout
-    │   ├── jobsService.js           # Public + admin job CRUD, snake_case→camelCase normalization
-    │   ├── applicationsService.js   # Public multipart submit, admin list/review/bulk/export
+    │   ├── api.js                   # Shared axios instance: base URL + error normalization (no auth)
+    │   ├── jobsService.js           # Public job reads, snake_case→camelCase normalization
+    │   ├── applicationsService.js   # Public multipart application submit
     │   ├── contactService.js        # Public contact form submit
-    │   ├── usersService.js          # Superadmin-only admin-user management
-    │   ├── auditLogsService.js      # Audit log list + CSV export
     │   └── fieldCatalogService.js   # Fetches + in-memory-caches the dynamic field catalog
     ├── utils/
     │   └── fieldCatalogHelpers.js   # Catalog-driven section/field visibility, validation, and derived-value helpers
@@ -132,53 +128,35 @@ The single HTML page Vite serves. Just a `#root` div and a module script pointin
 ### State layer
 
 **`src/context/PortalContext.jsx`**
-The single source of truth for the whole app — a `useReducer`-based context provider. Holds: `currentUser`, `token`, `pendingAuthToken` (mid-OTP-flow), `jobs`, `isLoadingJobs`, `fieldCatalog`, `isLoadingCatalog`, `applications`, `admins`, `auditLogs`, `toasts`.
+The single source of truth for the whole app — a `useReducer`-based context provider. Holds: `jobs`, `isLoadingJobs`, `fieldCatalog`, `isLoadingCatalog`, `toasts`. It has no auth state and never touches `localStorage` — sessions belong to the separate admin dashboard, which in development shares this origin's storage (both apps default to `localhost:5173`), so this site must not read, rewrite or clear those keys.
 
 On mount it:
-- Deletes legacy `localStorage` keys from a prior all-client-side prototype (`3dees_users`, `3dees_jobs`, `3dees_applications`, `3dees_audit_log`, `3dees_token`).
-- Rehydrates auth from `3dees_current_user` / `3dees_access_token` in `localStorage` if present, so a refresh doesn't log the user out.
 - Fetches public jobs via `jobsService.getJobs()` and populates `jobs`; shows an error toast if that fails; always flips `isLoadingJobs` to `false` in a `finally`.
 - Fetches the dynamic field catalog via `fieldCatalogService.getCatalog()` (no auth required, response cached by the service) and populates `fieldCatalog`; shows an error toast if that fails; always flips `isLoadingCatalog` to `false` in a `finally`.
-- Subscribes to a custom `auth:session-expired` window event (dispatched by `services/api.js` when a token refresh fails) and clears auth state + shows a warning toast when it fires.
 
 Exposes functions consumed through the `hooks/` selectors:
-- **Auth**: `login(email, password)` (step 1 → OTP triggered, returns `{pendingToken, destination}`), `verifyOtp(pendingToken, otpCode)` (step 2 → sets real tokens, persists them to `localStorage`, toasts a welcome message, and eagerly calls `loadAdminData()`), `logout()` (best-effort server-side revoke, always clears local tokens).
-- **Admin data loader**: `loadAdminData()` — parallel-fetches applications, admins, and audit logs after login; failure here is treated as non-fatal (dashboard would just show empty states).
-- **Jobs (admin)**: `postJob`, `editJob`, `removeJob` — call `jobsService`, dispatch reducer updates, and toast the result.
-- **Applications**: `applyToJob({jobId, answers, files})` — the public application submission. `answers` is a flat `{ [fieldKey]: string|boolean }` map covering every non-file catalog field the applicant answered (across whichever sections the job's `applicationRequirements` enabled) and `files` is `{ [fieldKey]: File | File[] }`. Builds one `FormData` multipart field per answer/file key — no JSON-blob wrapping — and returns the server-issued `referenceId`. `reviewApplication` and `bulkReviewApplications` are admin actions that update status and refresh audit logs; approving an application also fires a toast implying an "EGI Portal sync" is queued (see `VITE_EGI_PORTAL_ENDPOINT`).
-- **Admin users**: `registerAdmin`, `toggleAdminSuspension`, `resetAdminPass`, `removeAdmin` — superadmin user-management operations, all currently unreachable from the UI since the admin routes were removed.
+- **Toasts**: `addToast(type, title, message)`, `removeToast(id)`.
+- **Applications**: `applyToJob({jobId, answers, files})` — the public application submission. `answers` is a flat `{ [fieldKey]: string|boolean }` map covering every non-file catalog field the applicant answered (across whichever sections the job's `applicationRequirements` enabled) and `files` is `{ [fieldKey]: File | File[] }`. Builds one `FormData` multipart field per answer/file key — no JSON-blob wrapping — and returns the server-issued `referenceId`.
 
-**`src/hooks/useAuth.js` / `useJobs.js` / `useFieldCatalog.js` / `useApplications.js` / `useToast.js`**
-Each is a tiny wrapper: `useContext(PortalContext)`, throws if used outside `<PortalProvider>`, and returns a narrowed-down slice of the context (only the fields/functions relevant to that concern). `useFieldCatalog()` returns `{ catalog, isLoadingCatalog }`. This keeps page components from importing the raw context and picking fields ad hoc.
+**`src/hooks/useJobs.js` / `useFieldCatalog.js` / `useApplications.js` / `useToast.js`**
+Each is a tiny wrapper: `useContext(PortalContext)`, throws if used outside `<PortalProvider>`, and returns a narrowed-down slice of the context (only the fields/functions relevant to that concern). `useJobs()` returns `{ jobs, isLoadingJobs }`, `useFieldCatalog()` returns `{ catalog, isLoadingCatalog }`, `useApplications()` returns `{ applyToJob }`. This keeps page components from importing the raw context and picking fields ad hoc.
 
 ### Services (API layer)
 
 **`src/services/api.js`**
-The shared axios instance every service imports. Base URL is `(VITE_API_BASE_URL || '') + '/api'`. A request interceptor attaches `Authorization: Bearer <token>` from `localStorage` on every call. A response interceptor:
-- On a `401` with `error: 'TokenExpired'` (and not already retried), it silently calls `/auth/refresh` with the stored refresh token, stores the new access/refresh tokens, retries the original request, and — if multiple requests fail at once — queues them behind a single in-flight refresh via a subscriber list (`isRefreshing` / `refreshSubscribers`) so the app doesn't fire N parallel refresh calls.
-- If the refresh itself fails, it clears all three `localStorage` auth keys and dispatches the `auth:session-expired` `CustomEvent` that `PortalContext` listens for.
-- Every other error is normalized to `{ message, code, status }` so callers don't need to know axios's error shape.
-
-**`src/services/authService.js`**
-Thin wrappers around `/auth/login`, `/auth/verify-otp`, `/auth/refresh`, `/auth/logout`. Login is intentionally two-step (password → OTP email → OTP code) rather than a single call.
+The shared axios instance every service imports. Base URL is `(VITE_API_BASE_URL || '') + '/api'`, default `Content-Type: application/json` (the application submit overrides it to multipart per call). No `Authorization` header is ever sent — every endpoint this site calls is public. A response interceptor normalizes every error to `{ message, code, status }` so callers don't need to know axios's error shape (`Apply` and `Contact` show `err.message` in their failure toasts).
 
 **`src/services/jobsService.js`**
-`normalizeJob` converts the API's snake_case job object (`client_org`, `salary_range`, `closing_date`, `posted_by`, `application_requirements`, `created_at`, `is_expired`, …) into the camelCase shape the rest of the app uses. Exposes public reads (`getJobs`, `getJob` — no auth) and admin CRUD (`adminGetJobs`, `adminGetJob`, `adminCreateJob`, `adminUpdateJob`, `adminDeleteJob` — Bearer token required).
+`normalizeJob` converts the API's snake_case job object (`client_org`, `salary_range`, `closing_date`, `posted_by`, `application_requirements`, `created_at`, `is_expired`, …) into the camelCase shape the rest of the app uses. Exposes public reads only: `getJobs`, `getJob`.
 
 **`src/services/applicationsService.js`**
-`normalizeApplication` does the same snake_case→camelCase mapping for applications (`job_id`, `reference_id`, `personal_info`, `education_info`, `status_history`, `egi_sync_status`, `submitted_at`, …). `submitApplication(formData)` is the only public endpoint (multipart POST to `/applications`); everything else (`getApplications`, `exportApplications` as CSV blob, `getApplication`, `updateStatus`, `bulkUpdateStatus`) is admin-only, hitting `/admin/applications/*`.
+One function, `submitApplication(formData)` — multipart POST to `/applications`.
 
 **`src/services/fieldCatalogService.js`**
 `getCatalog()` — `GET /field-catalog` (no auth). Memoizes the response in a module-level variable after the first successful call, and de-dupes concurrent calls behind a single in-flight promise, so the catalog is fetched once per page load no matter how many components ask for it (`PortalContext` on mount, plus any `Apply`/`JobDetail` instance via `useFieldCatalog()`).
 
 **`src/services/contactService.js`**
 One function, `submit({fullName, email, phone, orgName, subject, message})`, posting to `/contact`. `phone`/`orgName` are optional and stripped to `undefined` if blank rather than sent as empty strings.
-
-**`src/services/usersService.js`**
-Superadmin-only admin-account management: `getUsers`, `createUser`, `toggleStatus` (Active ⇄ Suspended), `resetPassword` (also revokes that user's refresh tokens server-side), `deleteUser`. Normalizes `created_at`/`last_login` to camelCase.
-
-**`src/services/auditLogsService.js`**
-`getLogs` (list, with optional `search`/`status`/`officer` filters) and `exportLogs` (CSV blob) against `/admin/audit-logs*`. Normalizes each log entry (`application_id`, `applicant_name`, `job_title`, `prev_status`, `new_status`, `changed_by`, `timestamp`).
 
 ### Utils
 
@@ -253,13 +231,13 @@ PortalProvider (context/PortalContext.jsx)
    │
    └─ exposes: state + action functions via Context
 
-hooks/useAuth.js, useJobs.js, useFieldCatalog.js, useApplications.js, useToast.js
+hooks/useJobs.js, useFieldCatalog.js, useApplications.js, useToast.js
    │  (each just useContext + pick relevant fields)
    ▼
 pages/*.jsx  ← call hook functions, render state, no direct axios/localStorage access
 ```
 
-Pages never import `services/` directly (except `Contact.jsx`, which calls `contactService.submit()` inline since contact form submission has no shared state to manage) or touch `localStorage` — everything flows through the context/hooks layer. This keeps the "where does auth state live / how do I refetch jobs" question answerable from one file.
+Pages never import `services/` directly (except `Contact.jsx`, which calls `contactService.submit()` inline since contact form submission has no shared state to manage) or touch `localStorage` — everything flows through the context/hooks layer. This keeps the "where does this state live / how do I refetch jobs" question answerable from one file.
 
 ---
 
@@ -309,9 +287,9 @@ Set in `.env` (gitignored — copy from an `.env.example` if one exists, or crea
 # Production:  set to your domain, e.g. https://api.3dees.com
 VITE_API_BASE_URL=
 
-# EGI Portal integration endpoint (referenced conceptually by the "approved →
-# synced to EGI Portal" toast in PortalContext; not currently called directly
-# from the frontend — the actual sync happens server-side).
+# EGI Portal integration endpoint. Not referenced by any code in this repo —
+# the sync happens server-side, and the admin toast that alluded to it was
+# removed with the dead admin layer. Safe to drop from .env.
 VITE_EGI_PORTAL_ENDPOINT=https://egi-portal.3dees.net/api/candidates
 ```
 
@@ -342,19 +320,7 @@ Inferred from the service layer — this is what a compatible backend must expos
 - `POST /api/applications` — multipart form: `jobId`, plus one multipart field per catalog key the applicant answered (e.g. `firstName`, `email`, `dateOfBirth`, `cvUpload`, …) — no JSON-blob fields; which keys are sent depends entirely on the job's `applicationRequirements` config
 - `POST /api/contact` — `{ fullName, email, phone?, orgName?, subject, message }`
 
-**Auth**
-- `POST /api/auth/login` — `{ email, password }` → `{ pendingToken, destination }`
-- `POST /api/auth/verify-otp` — `{ pendingToken, otpCode }` → `{ accessToken, refreshToken, user }`
-- `POST /api/auth/refresh` — `{ refreshToken }` → `{ accessToken, refreshToken }`
-- `POST /api/auth/logout` — `{ refreshToken }`
-
-**Admin (Bearer token)**
-- `GET/POST/PUT/DELETE /api/admin/jobs[/:id]`
-- `GET /api/admin/applications`, `GET /api/admin/applications/export` (CSV), `GET /api/admin/applications/:id`, `PATCH /api/admin/applications/:id/status`, `PATCH /api/admin/applications/bulk-status`
-- `GET /api/admin/users`, `POST /api/admin/users`, `PATCH /api/admin/users/:id/status`, `PATCH /api/admin/users/:id/password`, `DELETE /api/admin/users/:id` (superadmin)
-- `GET /api/admin/audit-logs`, `GET /api/admin/audit-logs/export` (CSV)
-
-A 401 response with `{ error: 'TokenExpired' }` triggers the frontend's silent-refresh flow automatically.
+That is the whole contract. Auth and `/api/admin/*` endpoints are used only by the separate admin dashboard.
 
 ---
 
@@ -382,6 +348,7 @@ Chronological summary of what's been built, from `git log`:
 6. Small fixes: Vercel SPA rewrite config, mobile footer-badge visibility.
 7. **Dynamic job application requirements** (commit `939a1c9`) — replaced the old fixed 4-step Apply wizard (hardcoded Bio-Data/Education/Documents/Review fields, `personalInfo`/`educationInfo` JSON blobs) with a field-catalog-driven system: `fieldCatalogService`/`useFieldCatalog` fetch and cache a canonical field catalog from the backend; `fieldCatalogHelpers` derives which sections/fields a job's `applicationRequirements` config enables and validates them; `FieldRenderer` renders any catalog field by type; `Apply.jsx` and `JobDetail.jsx`'s requirements checklist were both rewritten against this catalog instead of a hardcoded field list. `docs/field-catalog-draft.md` is the working draft of that catalog, with open items still flagged for review (derived vs. input fields, duplicate fields across sections, experience-field shape) — it isn't locked yet, so the backend's actual catalog may still change shape.
 8. **README sync + Netlify redirect rule** (commits `d1c5c65`, `063087e`, current `HEAD`) — README updated to fully document the field-catalog work above, and `public/_redirects` added for Netlify-compatible SPA routing alongside the existing `vercel.json` rewrite.
+9. **Dead admin data layer removed** — the admin code left behind after step 4 was deleted: `authService`, `usersService`, `auditLogsService` and `useAuth`; the admin methods in `jobsService`/`applicationsService`; every auth/admin action, state field and reducer case in `PortalContext`; and the Bearer-token interceptor plus silent-refresh logic in `api.js`. None of it was reachable from a route, but it shipped in the bundle (exposing admin endpoint paths and request shapes), restored a stored session with an unguarded `JSON.parse` on every page load (a malformed value blanked the site), attached any stored admin token to public requests, and — because the admin dashboard shares `localStorage` with this site in development — could rotate the dashboard's refresh token behind its back. The site now never touches auth storage.
 
 **Why the admin portal was removed rather than kept:** the codebase and commit history don't state a reason explicitly, but the context strongly suggests the plan moved to a *separate* admin frontend backed by its own dedicated auth service — a sibling project, `egi-admin-portal` (see the `EGI Hub Backend` directory), describes itself as "a standalone authentication backend... so that a separate admin frontend can register a superadmin, log in, and maintain a session, independent of any other EGI backend service." That backend currently only handles auth (register/login/logout/me) and doesn't yet expose jobs/applications/users/audit-log endpoints, so it is **not** a drop-in replacement for the API this site's `services/` layer already expects — it appears to be an earlier or parallel piece of a still-being-built separate admin system, not the backend this site is currently pointed at.
 
@@ -389,11 +356,11 @@ Chronological summary of what's been built, from `git log`:
 
 ## Known gaps / things to know
 
-- **Admin UI is gone but admin logic isn't.** `PortalContext` still exposes `postJob`, `editJob`, `removeJob`, `reviewApplication`, `bulkReviewApplications`, `registerAdmin`, `toggleAdminSuspension`, `resetAdminPass`, `removeAdmin`, and `useAuth()` still returns `admins`/admin functions — none of it is reachable from any route today. If an admin portal is reintroduced here, this is where it would plug back in.
+- **Don't reintroduce auth storage access here.** In development this site and the admin dashboard share `localStorage` (same default port), so any read, rewrite or cleanup of `3dees_access_token` / `3dees_refresh_token` / `3dees_current_user` from this site interferes with a live dashboard session.
 - **Page `<title>`** in `index.html` is still the Vite template default (`"3dees-original"`), not the site's actual name — not yet rebranded.
 - **Social links** in the footer (LinkedIn/X/Facebook) point at the bare platform homepages, not 3DEES's real profiles — placeholders.
 - **Contact page map** is fully built (SVG grid, animated pin, GPS badge) but commented out, not deleted — a real map was decided against for now.
-- **`VITE_EGI_PORTAL_ENDPOINT`** is declared in `.env` and referenced conceptually (the "Client Sync Queued" toast on application approval) but never actually fetched from the frontend — that sync is assumed to happen server-side.
+- **`VITE_EGI_PORTAL_ENDPOINT`** is declared in `.env` but unused by any code in this repo — that sync happens server-side.
 - **Jobs/Apply pages filter and validate entirely client-side** against the already-fetched job list; there's no server-side search/pagination even though `jobsService.getJobs()` accepts `search`/`category`/`location`/`type` params (they're just never passed from the UI).
 - **Field catalog isn't locked yet.** `docs/field-catalog-draft.md` still has open review flags (e.g. whether Full Name/Age are derived vs. input fields, a duplicated Professional Registration Number field, whether §9 experience fields need years/detail beyond yes/no) — until it's finalized as the backend's real `GET /api/field-catalog` response, the Apply wizard and JobDetail checklist are only as correct as that draft.
 - **No client-side `src/config/fieldCatalog.js` exists** — the frontend has no fallback catalog; `Apply`/`JobDetail` show an explicit "form unavailable" state if `GET /api/field-catalog` fails or the backend hasn't implemented it yet.

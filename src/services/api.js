@@ -9,76 +9,16 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// ── Token refresh state ────────────────────────────────────────────────────
-let isRefreshing = false;
-let refreshSubscribers = [];
-
-function notifySubscribers(newToken, error) {
-  refreshSubscribers.forEach((cb) => cb(newToken, error));
-  refreshSubscribers = [];
-}
-
-// ── Request interceptor — inject Bearer token ──────────────────────────────
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('3dees_access_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-// ── Response interceptor — handle errors and silent token refresh ──────────
+// ── Response interceptor — normalise errors ────────────────────────────────
+// Every endpoint this site calls is public, so no Authorization header is
+// sent and auth storage is never read — it belongs to the admin dashboard.
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    const original = error.config;
+  (error) => {
     const body = error.response?.data;
     const status = error.response?.status;
 
-    // Silently refresh the access token on TokenExpired and retry once.
-    if (status === 401 && body?.error === 'TokenExpired' && !original._retry) {
-      if (isRefreshing) {
-        // Queue this request until the in-flight refresh completes.
-        return new Promise((resolve, reject) => {
-          refreshSubscribers.push((token, err) => {
-            if (err) return reject(err);
-            original.headers.Authorization = `Bearer ${token}`;
-            resolve(api(original));
-          });
-        });
-      }
-
-      original._retry = true;
-      isRefreshing = true;
-
-      try {
-        const storedRefresh = localStorage.getItem('3dees_refresh_token');
-        const { data } = await axios.post(`${API_BASE}/auth/refresh`, {
-          refreshToken: storedRefresh,
-        });
-        const { accessToken, refreshToken } = data.data;
-
-        localStorage.setItem('3dees_access_token', accessToken);
-        localStorage.setItem('3dees_refresh_token', refreshToken);
-        api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
-
-        notifySubscribers(accessToken, null);
-        original.headers.Authorization = `Bearer ${accessToken}`;
-        return api(original);
-      } catch (refreshError) {
-        notifySubscribers(null, refreshError);
-        localStorage.removeItem('3dees_access_token');
-        localStorage.removeItem('3dees_refresh_token');
-        localStorage.removeItem('3dees_current_user');
-        // Signal the app that the session has fully expired.
-        window.dispatchEvent(new CustomEvent('auth:session-expired'));
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
-      }
-    }
-
-    // Normalise every non-refresh error into a consistent shape.
+    // Normalise every error into a consistent shape.
     return Promise.reject({
       message: body?.message || error.message || 'An unexpected error occurred.',
       code: body?.error || 'ServerError',

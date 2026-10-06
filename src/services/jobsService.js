@@ -35,32 +35,4 @@ export const jobsService = {
     const { data } = await api.get(`/jobs/${id}`);
     return normalizeJob(data.data);
   },
-
-  // ── Admin (Bearer token required) ────────────────────────────────────────
-
-  /** List all jobs (all statuses). Accepts optional { search, category, status, type }. */
-  adminGetJobs: async (params = {}) => {
-    const { data } = await api.get('/admin/jobs', { params });
-    return data.data.map(normalizeJob);
-  },
-
-  adminGetJob: async (id) => {
-    const { data } = await api.get(`/admin/jobs/${id}`);
-    return normalizeJob(data.data);
-  },
-
-  adminCreateJob: async (jobData) => {
-    const { data } = await api.post('/admin/jobs', jobData);
-    return normalizeJob(data.data);
-  },
-
-  adminUpdateJob: async (id, jobData) => {
-    const { data } = await api.put(`/admin/jobs/${id}`, jobData);
-    return normalizeJob(data.data);
-  },
-
-  adminDeleteJob: async (id) => {
-    const { data } = await api.delete(`/admin/jobs/${id}`);
-    return data;
-  },
 };

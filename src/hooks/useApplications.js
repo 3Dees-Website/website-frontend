@@ -7,11 +7,7 @@ export function useApplications() {
     throw new Error('useApplications must be used inside a PortalProvider');
   }
   return {
-    applications: context.applications,
-    auditLogs: context.auditLogs,
     // Returns referenceId string; throws on API error.
     applyToJob: context.applyToJob,
-    reviewApplication: context.reviewApplication,
-    bulkReviewApplications: context.bulkReviewApplications,
   };
 }

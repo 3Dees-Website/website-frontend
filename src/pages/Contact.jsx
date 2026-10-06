@@ -52,7 +52,7 @@ export function Contact() {
     try {
       await contactService.submit(form);
       setForm({ fullName: '', email: '', phone: '', orgName: '', subject: '', message: '' });
-      addToast('success', 'Inquiry Ingested', 'Your corporate brief has been successfully logged. Board experts will contact you.');
+      addToast('success', 'Inquiry Sent', 'Your brief has been sent to our placements team. We will be in touch soon.');
     } catch (err) {
       addToast('error', 'Submission Failed', err.message || 'Could not send your message. Please try again.');
     } finally {

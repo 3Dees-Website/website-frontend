@@ -4,9 +4,11 @@
  */
 
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useToast } from '../hooks/useToast';
 import { contactService } from '../services/contactService';
+import { COMPANY } from '../constants/company';
 import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react';
 import './styles/Contact.css';
 
@@ -190,6 +192,11 @@ export function Contact() {
                 </>
               )}
             </button>
+
+            <p className="contact-privacy-note">
+              We'll only use your details to reply to your enquiry. See our{' '}
+              <Link to="/privacy" target="_blank" rel="noopener noreferrer" className="contact-privacy-link">Privacy Policy</Link>.
+            </p>
           </form>
         </div>
 
@@ -221,8 +228,8 @@ export function Contact() {
                 <Mail className="contact-info-icon" />
                 <div>
                   <h4 className="contact-info-label">Support Email Address</h4>
-                  <a href="mailto:consultingworks@3dees.net" className="contact-email-link">
-                    consultingworks@3dees.net
+                  <a href={`mailto:${COMPANY.email}`} className="contact-email-link">
+                    {COMPANY.email}
                   </a>
                 </div>
               </div>

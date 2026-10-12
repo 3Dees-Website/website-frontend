@@ -4,8 +4,10 @@
  */
 
 import { motion, AnimatePresence } from 'motion/react';
-import { Upload, FileCheck, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Upload, FileCheck, X, ExternalLink } from 'lucide-react';
 import { getSubfieldsOf, validateFile, deriveAge } from '../utils/fieldCatalogHelpers';
+import { DECLARATION_PANEL } from '../constants/declarationPanel';
 import '../pages/styles/Apply.css';
 
 /**
@@ -217,6 +219,43 @@ export function FieldRenderer({
     }
 
     case 'declaration': {
+      const panelEntry = DECLARATION_PANEL[field.key];
+      if (panelEntry) {
+        // "Read more" sits outside the <label> so clicking it can never
+        // toggle the checkbox. The checkbox itself is unchanged.
+        const descId = `decl-desc-${field.key}`;
+        return (
+          <div className={`apply-decl-item ${error ? 'apply-decl-item-err' : ''}`}>
+            <div className="apply-decl-head">
+              <span className="apply-decl-title">{panelEntry.title}</span>
+              <Link
+                to={panelEntry.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="apply-decl-more"
+                aria-label={`Read more: ${panelEntry.title} (opens in a new tab)`}
+              >
+                Read more <ExternalLink className="apply-decl-more-icon" aria-hidden="true" />
+              </Link>
+            </div>
+            <p className="apply-decl-explain" id={descId}>{panelEntry.explanation}</p>
+            <label className="apply-declaration-label apply-decl-check">
+              <input
+                type="checkbox"
+                checked={value === true}
+                onChange={(e) => onAnswerChange(field.key, e.target.checked)}
+                className="apply-checkbox"
+                aria-describedby={descId}
+              />
+              <span className="apply-declaration-text apply-decl-label-text">
+                {field.label} {required && <span className="apply-required">*</span>}
+              </span>
+            </label>
+            {error && <span className="apply-error-msg">{error}</span>}
+          </div>
+        );
+      }
+
       return (
         <div className="apply-declaration">
           <label className="apply-declaration-label">

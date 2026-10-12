@@ -455,3 +455,18 @@
   color: var(--color-brand-primary);
   vertical-align: middle;
 }
+/* ── Privacy note under the submit button ── */
+.contact-privacy-note {
+  font-size: 0.7rem;
+  color: var(--color-brand-text);
+  line-height: 1.6;
+  margin: 0;
+  text-align: center;
+}
+
+.contact-privacy-link {
+  color: var(--color-brand-primary);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

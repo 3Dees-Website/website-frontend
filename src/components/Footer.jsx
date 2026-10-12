@@ -3,6 +3,7 @@ import { Mail, MapPin, Phone } from 'lucide-react';
 import { FaLinkedinIn, FaFacebookF } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
 import { LogoSVG } from './Navbar';
+import { COMPANY } from '../constants/company';
 import './styles/Footer.css';
 
 export function Footer() {
@@ -81,8 +82,8 @@ export function Footer() {
               <div className="footer-contact-icon-wrap">
                 <Mail size={14} />
               </div>
-              <a href="mailto:consultingworks@3dees.net" className="footer-link footer-link--accent">
-                consultingworks@3dees.net
+              <a href={`mailto:${COMPANY.email}`} className="footer-link footer-link--accent">
+                {COMPANY.email}
               </a>
             </li>
           </ul>
@@ -92,7 +93,13 @@ export function Footer() {
 
       {/* Bottom Bar */}
       <div className="footer-bottom">
-        <p className="footer-copy">© {currentYear} 3DEES Consulting Works. All Rights Reserved.</p>
+        <div className="footer-bottom-left">
+          <p className="footer-copy">© {currentYear} 3DEES Consulting Works. All Rights Reserved.</p>
+          <nav className="footer-legal-links" aria-label="Legal">
+            <Link to="/terms" className="footer-legal-link">Terms &amp; Conditions</Link>
+            <Link to="/privacy" className="footer-legal-link">Privacy Policy</Link>
+          </nav>
+        </div>
         <div className="footer-badges">
           <span className="footer-badge">RC: 9160527</span>
           <span className="footer-badge">Registered Corporate Workforce Solutions Provider</span>

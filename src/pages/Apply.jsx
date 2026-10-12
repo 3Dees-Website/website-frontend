@@ -20,6 +20,7 @@ import {
   isEmptyValue,
   formatAnswerForReview,
 } from '../utils/fieldCatalogHelpers';
+import { DECLARATION_PANEL, DECLARATION_PANEL_ORDER } from '../constants/declarationPanel';
 import { ChevronRight, ChevronLeft, Check, AlertCircle, MapPin, Briefcase } from 'lucide-react';
 import './styles/Apply.css';
 
@@ -317,7 +318,13 @@ export function Apply() {
                           const visibleFields = getVisibleSectionFields(catalog, currentStep.key, reqs, answers)
                             .filter((field) => !field.conditionalOn); // subfields render recursively inside their yesno parent
                           const fileFields = visibleFields.filter((f) => f.type === 'file');
-                          const otherFields = visibleFields.filter((f) => f.type !== 'file');
+                          // Declarations with panel text render together in one panel, in
+                          // the panel's own order; unmapped ones stay in the grid.
+                          const isPanelField = (f) => f.type === 'declaration' && f.key in DECLARATION_PANEL;
+                          const panelFields = visibleFields
+                            .filter(isPanelField)
+                            .sort((a, b) => DECLARATION_PANEL_ORDER.indexOf(a.key) - DECLARATION_PANEL_ORDER.indexOf(b.key));
+                          const otherFields = visibleFields.filter((f) => f.type !== 'file' && !isPanelField(f));
                           const renderField = (field) => (
                             <FieldRenderer
                               key={field.key}
@@ -339,6 +346,11 @@ export function Apply() {
                               {otherFields.length > 0 && (
                                 <div className="apply-fields-grid">
                                   {otherFields.map(renderField)}
+                                </div>
+                              )}
+                              {panelFields.length > 0 && (
+                                <div className="apply-decl-panel" role="group" aria-label={currentStep.title}>
+                                  {panelFields.map(renderField)}
                                 </div>
                               )}
                               {fileFields.length > 0 && (
@@ -436,7 +448,7 @@ export function Apply() {
                                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                 <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                               </svg>
-                              <span>Encrypting & Saving Dossier...</span>
+                              <span>Submitting your application…</span>
                             </>
                           ) : (
                             <>
@@ -461,7 +473,9 @@ export function Apply() {
               <span>Intake Instructions</span>
             </h4>
             <p className="apply-sidebar-desc">
-              3DEES Consulting works enforces strict biometric and qualification compliance checkpoints.
+              Your information is handled in line with our{' '}
+              <Link to="/privacy" target="_blank" rel="noopener noreferrer" className="apply-sidebar-link">Privacy Policy</Link>
+              {' '}and the Nigeria Data Protection Act 2023.
             </p>
             <ul className="apply-sidebar-list">
               <li>Ensure spelling matches NIN details exactly.</li>

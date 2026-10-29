@@ -1,0 +1,263 @@
+/* Take Photo trigger (sits next to .apply-upload-btn inside the field block) */
+.apply-doc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.apply-camera-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  background-color: #fff;
+  color: var(--color-brand-primary);
+  border: 1px solid var(--color-brand-primary);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+
+.apply-camera-trigger:hover {
+  background-color: var(--color-brand-primary);
+  color: #fff;
+}
+
+/* Overlay. z-index clears the toast (50), navbar (40) and mobile drawer (39). */
+.apply-camera-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(10, 10, 10, 0.85);
+}
+
+.apply-camera-panel {
+  --camera-stage-w: min(100%, calc(min(65vh, 28rem) * 0.75));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  height: 100%; /* of the fixed backdrop, so it tracks the real visible viewport */
+  padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom));
+  background-color: #fff;
+  outline: none;
+  overflow-y: auto;
+}
+
+@supports (height: 100dvh) {
+  .apply-camera-panel {
+    --camera-stage-w: min(100%, calc(min(65dvh, 28rem) * 0.75));
+  }
+}
+
+@media (min-width: 768px) {
+  .apply-camera-panel {
+    width: 26rem;
+    height: auto;
+    max-height: calc(100vh - 2rem);
+    padding: 1.25rem;
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow-subtle);
+  }
+}
+
+.apply-camera-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.apply-camera-title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-brand-dark);
+}
+
+.apply-camera-close {
+  display: flex;
+  align-items: center;
+  padding: 0.375rem;
+  margin: -0.375rem;
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.apply-camera-close:hover { color: var(--color-brand-dark); }
+
+/* 3:4 portrait stage: the saved photo is cropped to this same ratio. */
+.apply-camera-stage {
+  position: relative;
+  flex-shrink: 0;
+  width: var(--camera-stage-w);
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 0.375rem;
+  background-color: var(--color-brand-dark);
+}
+
+.apply-camera-video,
+.apply-camera-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+}
+
+.apply-camera-video-mirror { transform: scaleX(-1); }
+.apply-camera-video-hidden { opacity: 0; pointer-events: none; }
+
+.apply-camera-guide {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 62%;
+  aspect-ratio: 3 / 4;
+  transform: translate(-50%, -50%);
+  border: 2px dashed rgba(255, 255, 255, 0.75);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.apply-camera-status,
+.apply-camera-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.25rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #fff;
+}
+
+.apply-camera-error {
+  background-color: #fff;
+  color: var(--color-brand-text);
+  overflow-y: auto;
+}
+
+.apply-camera-status-hint {
+  font-size: 0.7rem;
+  opacity: 0.75;
+}
+
+.apply-camera-spinner { animation: applySpin 1s linear infinite; }
+.apply-camera-error-icon { color: #ef4444; flex-shrink: 0; }
+
+.apply-camera-error-title {
+  font-size: 0.8rem;
+  color: var(--color-brand-dark);
+}
+
+.apply-camera-error-body {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.apply-camera-hint,
+.apply-camera-notice {
+  margin: 0;
+  width: var(--camera-stage-w);
+  font-size: 0.7rem;
+  text-align: center;
+}
+
+.apply-camera-hint { color: var(--color-brand-text); }
+.apply-camera-notice { color: #ef4444; font-weight: 600; }
+
+/* Footer actions */
+.apply-camera-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  width: var(--camera-stage-w);
+  margin-top: auto;
+}
+
+.apply-camera-footer-live {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+}
+
+.apply-camera-footer-live .apply-camera-cancel { justify-self: start; }
+.apply-camera-footer-live .apply-camera-flip { justify-self: end; }
+
+.apply-camera-footer-review .apply-camera-btn { flex: 1; }
+
+.apply-camera-footer-error { flex-wrap: wrap; }
+.apply-camera-footer-error .apply-camera-btn { flex: 1 1 8rem; }
+
+.apply-camera-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.625rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.apply-camera-btn-primary {
+  background-color: var(--color-brand-primary);
+  color: #fff;
+  border: 1px solid var(--color-brand-primary);
+}
+
+.apply-camera-btn-primary:hover {
+  background-color: var(--color-brand-secondary);
+  border-color: var(--color-brand-secondary);
+}
+
+.apply-camera-btn-secondary {
+  background: none;
+  color: var(--color-brand-dark);
+  border: 1px solid #e5e7eb;
+}
+
+.apply-camera-btn-secondary:hover {
+  color: var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
+}
+
+.apply-camera-flip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: none;
+  color: var(--color-brand-dark);
+  border: 1px solid #e5e7eb;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.apply-camera-flip:hover {
+  color: var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
+}

@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { Upload, FileCheck, X, ExternalLink } from 'lucide-react';
 import { getSubfieldsOf, validateFile, deriveAge } from '../utils/fieldCatalogHelpers';
 import { DECLARATION_PANEL } from '../constants/declarationPanel';
+import { PhotoCaptureControl } from './CameraCapture';
 import '../pages/styles/Apply.css';
 
 /**
@@ -301,6 +302,26 @@ export function FieldRenderer({
         });
       };
 
+      // Image-only fields (today just passportPhotoUpload) also offer a live camera.
+      const mimeTypes = field.validation?.mimeTypes;
+      const isImageOnly = !field.multiple
+        && mimeTypes?.length > 0
+        && mimeTypes.every((t) => t.startsWith('image/'));
+
+      const uploadButton = (
+        <label className="apply-upload-btn">
+          <Upload className="apply-upload-icon" />
+          <span>{field.multiple ? 'Attach File' : 'Choose File'}</span>
+          <input
+            type="file"
+            multiple={field.multiple}
+            accept={accept}
+            onChange={handlePick}
+            className="apply-file-hidden"
+          />
+        </label>
+      );
+
       return (
         <div className="apply-doc-block">
           <span className="apply-doc-label">
@@ -308,17 +329,12 @@ export function FieldRenderer({
           </span>
 
           {(!field.multiple ? currentList.length === 0 : currentList.length < maxFiles) && (
-            <label className="apply-upload-btn">
-              <Upload className="apply-upload-icon" />
-              <span>{field.multiple ? 'Attach File' : 'Choose File'}</span>
-              <input
-                type="file"
-                multiple={field.multiple}
-                accept={accept}
-                onChange={handlePick}
-                className="apply-file-hidden"
-              />
-            </label>
+            isImageOnly ? (
+              <div className="apply-doc-actions">
+                {uploadButton}
+                <PhotoCaptureControl field={field} onCapture={(file) => onFileChange(field.key, file)} />
+              </div>
+            ) : uploadButton
           )}
 
           {currentList.length > 0 && (

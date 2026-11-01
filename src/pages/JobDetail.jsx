@@ -6,18 +6,17 @@
 import { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { useJobs } from '../hooks/useJobs';
+import { useJob } from '../hooks/useJob';
 import { useFieldCatalog } from '../hooks/useFieldCatalog';
 import { MapPin, Briefcase, Calendar, Clipboard, ShieldCheck, CheckCircle2, Circle, ChevronRight } from 'lucide-react';
 import './styles/JobDetail.css';
 
 export function JobDetail() {
   const { id } = useParams();
-  const { jobs, isLoadingJobs } = useJobs();
+  const { job, isLoading: isLoadingJob, error: jobError } = useJob(id);
   const { catalog } = useFieldCatalog();
 
   // All hooks must run unconditionally before any early returns.
-  const job = useMemo(() => jobs.find((j) => j.id === id), [jobs, id]);
 
   // "What you'll need" checklist — generated from the job's per-field
   // application_requirements config + catalog labels. Conditional sub-fields
@@ -51,7 +50,7 @@ export function JobDetail() {
     return str.split('\n').filter((item) => item.trim() !== '');
   };
 
-  if (isLoadingJobs) {
+  if (isLoadingJob) {
     return (
       <div className="jd-loading" aria-live="polite">
         <title>Jobs | 3DEES</title>
@@ -69,9 +68,11 @@ export function JobDetail() {
     return (
       <div className="jd-not-found">
         <title>Jobs | 3DEES</title>
-        <h2 className="jd-not-found-title">Vacancy Not Found</h2>
+        <h2 className="jd-not-found-title">{jobError ? 'Could Not Load Vacancy' : 'Vacancy Not Found'}</h2>
         <p className="jd-not-found-desc">
-          The requested recruitment listing does not exist or has been withdrawn by administrative oversight.
+          {jobError
+            ? 'Something went wrong reaching the server. Please check your connection and try again shortly.'
+            : 'The requested recruitment listing does not exist or has been withdrawn by administrative oversight.'}
         </p>
         <Link to="/jobs" className="jd-not-found-btn">
           Return to Jobs Catalog

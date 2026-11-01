@@ -6,7 +6,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { useJobs } from '../hooks/useJobs';
+import { useJob } from '../hooks/useJob';
 import { useApplications } from '../hooks/useApplications';
 import { useFieldCatalog } from '../hooks/useFieldCatalog';
 import { useToast } from '../hooks/useToast';
@@ -30,17 +30,16 @@ const REVIEW_STEP_KEY = '__review';
 
 export function Apply() {
   const { id } = useParams();
-  const { jobs, isLoadingJobs } = useJobs();
+  const { job, isLoading: isLoadingJob, error: jobError } = useJob(id);
   const { catalog, isLoadingCatalog } = useFieldCatalog();
   const { applyToJob } = useApplications();
   const { addToast } = useToast();
   const navigate = useNavigate();
-  const isLoadingPage = isLoadingJobs || isLoadingCatalog;
+  const isLoadingPage = isLoadingJob || isLoadingCatalog;
   // Same timing as the <Loading> below, so the page swap waits for its minimum.
   const { busy: isPageBusy } = useLoadingGate(isLoadingPage);
 
   // All hooks must be declared unconditionally before any early returns.
-  const job = useMemo(() => jobs.find((j) => j.id === id), [jobs, id]);
   const reqs = useMemo(() => job?.applicationRequirements || {}, [job]);
 
   const [step, setStep] = useState(0);
@@ -93,9 +92,11 @@ export function Apply() {
     return (
       <div className="apply-not-found">
         <title>Apply | 3DEES</title>
-        <h2 className="apply-not-found-title">Invalid Application Route</h2>
+        <h2 className="apply-not-found-title">{jobError ? 'Could Not Load Vacancy' : 'Invalid Application Route'}</h2>
         <p className="apply-not-found-desc">
-          The careers portal you are trying to access does not match any active recruitment workflows.
+          {jobError
+            ? 'Something went wrong reaching the server. Please check your connection and try again shortly.'
+            : 'The careers portal you are trying to access does not match any active recruitment workflows.'}
         </p>
         <Link to="/jobs" className="apply-not-found-btn">Browse Open Positions</Link>
       </div>

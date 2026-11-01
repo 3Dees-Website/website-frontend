@@ -6,7 +6,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { useJobs } from '../hooks/useJobs';
+import { useFeaturedJobs } from '../hooks/useFeaturedJobs';
 import {
   ArrowRight, ChevronRight,
   UserPlus, FileText, ClipboardList, Users, ClipboardCheck, Award
@@ -49,9 +49,7 @@ function StatCounter({ end, text, suffix = '+' }) {
 }
 
 export function Home() {
-  const { jobs } = useJobs();
-
-  const featuredRoles = jobs.filter((j) => j.status === 'Active').slice(0, 3);
+  const { jobs: featuredRoles, isLoading: isLoadingFeatured } = useFeaturedJobs(3);
 
   const steps = [
     { num: '01', title: 'Register',  icon: <UserPlus className="home-step-icon" />,      desc: 'Upload professional CV' },
@@ -231,7 +229,7 @@ export function Home() {
                   </div>
                 </motion.div>
               ))
-            ) : (
+            ) : isLoadingFeatured ? null : (
               <div className="home-featured-empty">
                 <span>No active roles are currently featured. Please visit our jobs catalog.</span>
               </div>

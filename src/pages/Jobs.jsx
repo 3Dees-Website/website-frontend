@@ -3,57 +3,60 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { useJobs } from '../hooks/useJobs';
+import { useJobsList } from '../hooks/useJobsList';
+import { useJobFilters } from '../hooks/useJobFilters';
+import { useLoadingGate } from '../hooks/useLoadingGate';
 import { Search, MapPin, Briefcase, Calendar, RotateCcw, ChevronRight, Inbox } from 'lucide-react';
 import './styles/Jobs.css';
 
-export function Jobs() {
-  const { jobs, isLoadingJobs } = useJobs();
+const SEARCH_DEBOUNCE_MS = 350;
 
-  const [searchTerm, setSearchTerm] = useState('');
+export function Jobs() {
+  const [searchInput, setSearchInput] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedType, setSelectedType] = useState('All');
-  const [visibleCount, setVisibleCount] = useState(6);
 
-  const categories = useMemo(() => {
-    const activeJobs = jobs.filter((j) => j.status === 'Active');
-    const set = new Set(activeJobs.map((j) => j.category));
-    return ['All', ...Array.from(set)];
-  }, [jobs]);
+  // Typing waits for a pause; dropdown changes apply immediately.
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchInput.trim()), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
-  const hasActiveJobs = useMemo(() => jobs.some((j) => j.status === 'Active'), [jobs]);
+  const {
+    jobs, error, openTotal, hasLoaded, isLoading, isLoadingMore, hasMore, loadMore,
+  } = useJobsList({
+    search: debouncedSearch,
+    category: selectedCategory === 'All' ? '' : selectedCategory,
+    type: selectedType === 'All' ? '' : selectedType,
+  });
+  const filters = useJobFilters();
 
-  const types = useMemo(() => {
-    const activeJobs = jobs.filter((j) => j.status === 'Active');
-    const set = new Set(activeJobs.map((j) => j.type));
-    return ['All', ...Array.from(set)];
-  }, [jobs]);
+  // Nothing to show yet -> skeletons straight away. A refetch keeps the previous
+  // results on screen and only shows skeletons if it runs past the loading gate.
+  const isInitialLoading = isLoading && !hasLoaded;
+  const { visible: refetchSkeletons } = useLoadingGate(isLoading && hasLoaded);
+  const showSkeletons = isInitialLoading || refetchSkeletons;
 
-  const filteredJobs = useMemo(() => {
-    return jobs.filter((job) => {
-      if (job.status !== 'Active') return false;
-      const matchesSearch =
-        job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.clientOrg.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.description.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = selectedCategory === 'All' || job.category === selectedCategory;
-      const matchesType = selectedType === 'All' || job.type === selectedType;
-      return matchesSearch && matchesCategory && matchesType;
-    });
-  }, [jobs, searchTerm, selectedCategory, selectedType]);
+  // Whether any job is open at all: the unfiltered page-1 total when we have
+  // it, the filter options otherwise (only if that first request failed).
+  const hasActiveJobs =
+    openTotal !== null ? openTotal > 0 : filters.categories.length > 0 || filters.types.length > 0;
+
+  const categories = ['All', ...filters.categories];
+  const types = ['All', ...filters.types];
 
   const handleResetFilters = () => {
-    setSearchTerm('');
+    setSearchInput('');
+    setDebouncedSearch('');
     setSelectedCategory('All');
     setSelectedType('All');
-    setVisibleCount(6);
   };
 
-  const paginatedJobs = filteredJobs.slice(0, visibleCount);
-  const hasActiveFilters = searchTerm || selectedCategory !== 'All' || selectedType !== 'All';
+  const hasActiveFilters = searchInput || selectedCategory !== 'All' || selectedType !== 'All';
 
   return (
     <motion.div
@@ -81,7 +84,7 @@ export function Jobs() {
       </div>
 
       {/* Filters Card */}
-      {(isLoadingJobs || hasActiveJobs) && (
+      {(isInitialLoading || hasActiveJobs) && (
         <div className="jobs-filters-card" id="filter-wrapper-card">
           <div className="jobs-filters-grid">
 
@@ -92,8 +95,8 @@ export function Jobs() {
                 <input
                   type="text"
                   placeholder="Job title, client, keyword..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
                   className="jobs-search-input"
                   id="search-input-field"
                 />
@@ -150,7 +153,7 @@ export function Jobs() {
 
       {/* Job Listings */}
       <div className="jobs-listings">
-        {isLoadingJobs && (
+        {showSkeletons && (
           <div className="jobs-loading" aria-live="polite">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="job-card job-card-skeleton" aria-hidden="true">
@@ -162,9 +165,9 @@ export function Jobs() {
           </div>
         )}
         <AnimatePresence mode="popLayout">
-          {!isLoadingJobs && filteredJobs.length > 0 ? (
+          {!showSkeletons && jobs.length > 0 ? (
             <div className="jobs-grid" id="job-listing-container">
-              {paginatedJobs.map((job) => (
+              {jobs.map((job) => (
                 <motion.div
                   key={job.id}
                   layout
@@ -222,7 +225,7 @@ export function Jobs() {
                 </motion.div>
               ))}
             </div>
-          ) : !isLoadingJobs ? (
+          ) : !showSkeletons ? (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -232,7 +235,14 @@ export function Jobs() {
               <div className="jobs-empty-icon-wrap">
                 <Inbox className="jobs-empty-icon" />
               </div>
-              {hasActiveJobs ? (
+              {error ? (
+                <>
+                  <h3 className="jobs-empty-title">Could Not Load Vacancies</h3>
+                  <p className="jobs-empty-desc">
+                    Something went wrong reaching the server. Please check your connection and try again shortly.
+                  </p>
+                </>
+              ) : hasActiveJobs ? (
                 <>
                   <h3 className="jobs-empty-title">No Vacancies Matched</h3>
                   <p className="jobs-empty-desc">
@@ -255,14 +265,15 @@ export function Jobs() {
         </AnimatePresence>
 
         {/* Load More */}
-        {filteredJobs.length > visibleCount && (
+        {!showSkeletons && hasMore && (
           <div className="jobs-load-more-row">
             <button
-              onClick={() => setVisibleCount((prev) => prev + 4)}
+              onClick={loadMore}
+              disabled={isLoadingMore}
               className="jobs-load-more-btn"
               id="load-more-btn"
             >
-              Load More Vacancies
+              {isLoadingMore ? 'Loading…' : 'Load More Vacancies'}
             </button>
           </div>
         )}

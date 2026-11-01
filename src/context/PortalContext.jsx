@@ -1,12 +1,9 @@
-import { useReducer, useEffect } from 'react';
+import { useCallback, useReducer, useEffect } from 'react';
 import { PortalContext } from './portalContextObject';
-import { jobsService } from '../services/jobsService';
 import { applicationsService } from '../services/applicationsService';
 import { fieldCatalogService } from '../services/fieldCatalogService';
 
 const initialState = {
-  jobs: [],
-  isLoadingJobs: true,
   fieldCatalog: null,       // { sections, fields, mandatoryKeys, lgasByState }
   isLoadingCatalog: true,
   toasts: [],
@@ -14,10 +11,6 @@ const initialState = {
 
 function portalReducer(state, action) {
   switch (action.type) {
-    case 'SET_JOBS_LOADING':
-      return { ...state, isLoadingJobs: action.payload };
-    case 'SET_JOBS':
-      return { ...state, jobs: action.payload };
     case 'SET_CATALOG_LOADING':
       return { ...state, isLoadingCatalog: action.payload };
     case 'SET_FIELD_CATALOG':
@@ -36,35 +29,20 @@ export function PortalProvider({ children }) {
 
   // ── Helpers ──────────────────────────────────────────────────────────────
 
-  const toast = (type, title, message) =>
-    dispatch({
-      type: 'ADD_TOAST',
-      payload: { id: Math.random().toString(36).substring(2, 9), type, title, message },
-    });
-
-  const addToast = (type, title, message) => toast(type, title, message);
-  const removeToast = (id) => dispatch({ type: 'DISMISS_TOAST', payload: id });
+  // Stable identities, so the data hooks can list addToast as an effect dependency.
+  const addToast = useCallback(
+    (type, title, message) =>
+      dispatch({
+        type: 'ADD_TOAST',
+        payload: { id: Math.random().toString(36).substring(2, 9), type, title, message },
+      }),
+    [],
+  );
+  const removeToast = useCallback((id) => dispatch({ type: 'DISMISS_TOAST', payload: id }), []);
 
   // ── Bootstrap on mount ───────────────────────────────────────────────────
 
   useEffect(() => {
-    // Load public jobs (no auth required).
-    jobsService
-      .getJobs()
-      .then((jobs) => dispatch({ type: 'SET_JOBS', payload: jobs }))
-      .catch(() =>
-        dispatch({
-          type: 'ADD_TOAST',
-          payload: {
-            id: Math.random().toString(36).substring(2, 9),
-            type: 'error',
-            title: 'Connection Error',
-            message: 'Could not load job listings. Please check your connection.',
-          },
-        })
-      )
-      .finally(() => dispatch({ type: 'SET_JOBS_LOADING', payload: false }));
-
     // Load the field catalog (no auth required, cached by the service).
     fieldCatalogService
       .getCatalog()

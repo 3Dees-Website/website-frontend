@@ -10,7 +10,9 @@ import { useJobs } from '../hooks/useJobs';
 import { useApplications } from '../hooks/useApplications';
 import { useFieldCatalog } from '../hooks/useFieldCatalog';
 import { useToast } from '../hooks/useToast';
+import { useLoadingGate } from '../hooks/useLoadingGate';
 import { FieldRenderer } from '../components/FieldRenderer';
+import { Loading } from '../components/Loading';
 import {
   getEnabledSections,
   getVisibleSectionFields,
@@ -33,6 +35,9 @@ export function Apply() {
   const { applyToJob } = useApplications();
   const { addToast } = useToast();
   const navigate = useNavigate();
+  const isLoadingPage = isLoadingJobs || isLoadingCatalog;
+  // Same timing as the <Loading> below, so the page swap waits for its minimum.
+  const { busy: isPageBusy } = useLoadingGate(isLoadingPage);
 
   // All hooks must be declared unconditionally before any early returns.
   const job = useMemo(() => jobs.find((j) => j.id === id), [jobs, id]);
@@ -75,11 +80,11 @@ export function Apply() {
     [enabledSections]
   );
 
-  if (isLoadingJobs || isLoadingCatalog) {
+  if (isPageBusy) {
     return (
       <div className="apply-not-found">
         <title>Apply | 3DEES</title>
-        <p className="apply-not-found-desc">Loading vacancy details…</p>
+        <Loading isLoading={isLoadingPage} size="lg" label="Loading vacancy details…" showLabel />
       </div>
     );
   }
@@ -448,10 +453,7 @@ export function Apply() {
                           id="form-submit-btn">
                           {isSubmitting ? (
                             <>
-                              <svg className="apply-spinner" fill="none" viewBox="0 0 24 24">
-                                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                              </svg>
+                              <Loading isLoading={isSubmitting} size="sm" color="#fff" minDuration={0} reserveSpace label="Submitting your application" />
                               <span>Submitting your application…</span>
                             </>
                           ) : (

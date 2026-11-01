@@ -161,7 +161,6 @@
   opacity: 0.75;
 }
 
-.apply-camera-spinner { animation: applySpin 1s linear infinite; }
 .apply-camera-error-icon { color: #ef4444; flex-shrink: 0; }
 
 .apply-camera-error-title {

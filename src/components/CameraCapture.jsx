@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'motion/react';
-import { Camera, AlertCircle, FlipHorizontal, Loader2, X } from 'lucide-react';
+import { Camera, AlertCircle, FlipHorizontal, X } from 'lucide-react';
+import { Loading } from './Loading';
 import { validateFile } from '../utils/fieldCatalogHelpers';
 import './styles/CameraCapture.css';
 
@@ -350,7 +351,7 @@ function CameraCapture({ field, onCapture, onClose }) {
           {phase === 'live' && <div className="apply-camera-guide" aria-hidden="true" />}
           {phase === 'requesting' && (
             <div className="apply-camera-status" role="status">
-              <Loader2 className="apply-camera-spinner" size={24} />
+              <Loading isLoading size="sm" color="currentColor" minDuration={0} reserveSpace label="Starting camera" />
               <span>Starting camera…</span>
               {!everLive && <span className="apply-camera-status-hint">Choose &ldquo;Allow&rdquo; when your browser asks for camera access.</span>}
             </div>

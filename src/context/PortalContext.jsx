@@ -1,4 +1,5 @@
-import { createContext, useReducer, useEffect } from 'react';
+import { useReducer, useEffect } from 'react';
+import { PortalContext } from './portalContextObject';
 import { jobsService } from '../services/jobsService';
 import { applicationsService } from '../services/applicationsService';
 import { fieldCatalogService } from '../services/fieldCatalogService';
@@ -29,8 +30,6 @@ function portalReducer(state, action) {
       return state;
   }
 }
-
-export const PortalContext = createContext(undefined);
 
 export function PortalProvider({ children }) {
   const [state, dispatch] = useReducer(portalReducer, initialState);

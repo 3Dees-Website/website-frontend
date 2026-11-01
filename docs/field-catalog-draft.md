@@ -147,15 +147,23 @@ Admins enable Referee 1 fields, Referee 2 fields, or both, per job.
 
 | Key | Label | Type | Notes |
 |---|---|---|---|
-| `rightToWork` | Right to Work in Nigeria | yesno | "No" is a valid (recorded) answer |
-| `physicallyFit` | Physically Fit for the Role | yesno | |
-| `medicalFitnessDecl` | Medical Fitness Declaration | declaration | must be ticked if required |
-| `criminalRecordDecl` | Do you have any criminal record? | yesno | phrased as a question; "Yes" is recordable, not blocking |
-| `consentBackgroundCheck` | Consent to Background Check | declaration | |
-| `consentReferenceCheck` | Consent to Reference Check | declaration | |
-| `agreeTerms` | Agree to Terms & Conditions | declaration | |
-| `agreePrivacy` | Agree to Privacy Policy | declaration | |
-| `declarationAccurate` | I declare the information provided is accurate | declaration | |
+| `agreeTerms` | I agree to the Terms & Conditions | declaration | mandatory; also covers accuracy, background/reference-check consent and (where the role requires it) medical-fitness and eligibility declarations |
+| `agreePrivacy` | I agree to the Privacy Policy | declaration | mandatory |
+
+The earlier separate fields `declarationAccurate`, `consentBackgroundCheck`,
+`consentReferenceCheck`, `medicalFitnessDecl`, `rightToWork`, `physicallyFit`
+and `criminalRecordDecl` were removed; they no longer exist in the catalog.
+
+Suggested panel text for the website (`agreeTerms`): title "Terms & Conditions";
+"By ticking this box you accept the Terms & Conditions, which include: your
+declaration that everything in your application is true and your documents are
+genuine; your consent to background and reference checks; and, where the role
+requires it, your declarations that you have the right to work in Nigeria, are
+physically fit for the role, and have disclosed any criminal record."
+
+> **Lawyer review pending.** Bundling background- and reference-check consent
+> into the Terms tick-box may be weaker consent under Nigeria's data-protection
+> rules, which expect consent to be specific. Confirm before launch.
 
 ## 9. ROLE-SPECIFIC FIELDS — section key `roleSpecific`
 
@@ -220,9 +228,8 @@ can always use "Other" with a custom label:
   "driversLicenceUpload": "required",
   "validDriversLicence": "required",
   "driversLicenceClass": "required",
-  "consentBackgroundCheck": "required",
   "agreeTerms": "required",
-  "declarationAccurate": "required"
+  "agreePrivacy": "required"
 }
 ```
 

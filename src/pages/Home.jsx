@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useJobs } from '../hooks/useJobs';
 import {
-  ArrowRight, CheckCircle, ShieldCheck, Zap, ChevronRight,
+  ArrowRight, ChevronRight,
   UserPlus, FileText, ClipboardList, Users, ClipboardCheck, Award
 } from 'lucide-react';
 import './styles/Home.css';

@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { PortalContext } from '../context/PortalContext';
+import { PortalContext } from '../context/portalContextObject';
 
 export function useApplications() {
   const context = useContext(PortalContext);

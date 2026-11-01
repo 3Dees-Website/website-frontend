@@ -1,6 +1,6 @@
 # Legal pages — content for the 3DEES public website
 
-Three pages: Terms & Conditions (/terms), Privacy Policy (/privacy), Applicant Declarations (/declaration). Plus the short text for each tick-box on the application form (end of file).
+Two pages: Terms & Conditions (/terms) and Privacy Policy (/privacy). The former Applicant Declarations page is now section 5 of the Terms; `/declaration` redirects to `/terms#declarations`. Plus the short text for each tick-box on the application form (end of file).
 
 Anything in `[[double brackets]]` is a placeholder or a decision still to make. Search for `[[` before launch — none should remain.
 
@@ -12,7 +12,9 @@ Anything in `[[double brackets]]` is a placeholder or a decision still to make. 
 - `[[30 days]]` — response time for data requests; lawyer to confirm against the GAID
 - `[[LAWYER: ...]]` — points the lawyer must specifically check
 
-**Settled:** contact email is info@3deesrecruitment.com (used across the whole site); RC number is 9160527 (as already shown on the site); 3DEES never charges applicants; ECO Green Investments Limited has agreed to be named; Background and Reference check consents are required on every job, Medical Fitness only on jobs that need it; retention is 12 months after the recruitment process ends, applied manually by 3DEES; a lawyer will review before launch.
+**Settled:** contact email is info@3deesrecruitment.com (used across the whole site); RC number is 9160527 (as already shown on the site); 3DEES never charges applicants; ECO Green Investments Limited has agreed to be named; the application form has just two tick-boxes, `agreeTerms` and `agreePrivacy`. Background check, reference check, accuracy, medical fitness, right to work and criminal record declarations are all given through `agreeTerms` (Terms section 5); retention is 12 months after the recruitment process ends, applied manually by 3DEES; a lawyer will review before launch.
+
+**⚠ LAWYER — specific sign-off needed before launch:** background-check and reference-check consent (and the medical fitness / criminal record declarations, which involve sensitive personal data) are bundled into one general agreement to the Terms, with no tick-box of their own. Under the NDPA 2023 and the GAID, consent must be specific, informed and freely given, and bundled consent may be weaker or invalid. Decide whether this is acceptable, or whether separate tick-boxes (or a different lawful basis) are needed. This is deliberately unresolved here. See the `[[LAWYER: ...]]` markers in Terms section 5.
 
 ---
 
@@ -21,7 +23,7 @@ Anything in `[[double brackets]]` is a placeholder or a decision still to make. 
 **Terms & Conditions**
 *Last updated: [[EFFECTIVE DATE]]*
 
-These terms explain the rules for using the 3DEES recruitment website and applying for jobs through it. Please read them before you submit an application. By ticking the box to agree to these Terms & Conditions and submitting an application, you accept these terms.
+These terms explain the rules for using the 3DEES recruitment website and applying for jobs through it. Please read them before you submit an application. By ticking the box to agree to these Terms & Conditions and submitting an application, you accept these terms, including the declarations and consents in section 5.
 
 ## 1. Who we are
 
@@ -48,30 +50,84 @@ Some jobs have extra requirements (for example, a qualification, licence or loca
 ## 4. Your application
 
 When you submit an application:
-- You confirm that every answer you give and every document you upload is accurate and genuine. See our Applicant Declarations for details.
+- You confirm that every answer you give and every document you upload is accurate and genuine. Section 5 sets out the declarations and consents you give.
 - You confirm that any documents you upload belong to you and that you have the right to share them.
 - If you give details of referees, you confirm that they have agreed to be contacted about you.
 - You understand that we may check the information you give us, including by contacting referees, schools, past employers or the issuers of your certificates.
 
 Once an application has been submitted, you cannot edit it yourself. If something needs correcting, contact us at info@3deesrecruitment.com and quote your application reference number.
 
-## 5. No guarantee of a job
+## 5. Your declarations and consents
+
+[[LAWYER: background-check and reference-check consent is bundled into this general agreement, with no separate tick-box. Confirm this is valid, specific and informed consent under the NDPA 2023 and the GAID; if not, these two need their own tick-boxes again.]]
+
+By ticking the box to agree to these Terms & Conditions, you also make the declarations and give the consents in this section. You can withdraw a consent at any time by emailing info@3deesrecruitment.com with your application reference number. If you do, we may not be able to continue with your application.
+
+### 5.1 Accuracy of information
+By submitting my application, I declare that:
+
+1. All the information I have given in this application is true, complete and accurate to the best of my knowledge.
+2. I have not left out any information that could reasonably affect the decision on my application.
+3. Every document I have uploaded is genuine, belongs to me, and has not been altered in any way.
+4. I am applying for myself, not on behalf of anyone else.
+5. Any referees I have named have agreed to be contacted about me.
+
+I understand that if any information I have given is found to be false, misleading or incomplete — at any time, including after I have been hired:
+
+- my application may be rejected
+- any job offer may be withdrawn
+- if I have already been employed, my employment may be ended
+- where the matter involves forged or fraudulent documents, it may be reported to the relevant authorities
+
+If any of my details change, or I find a mistake in my application after submitting it, I will tell 3DEES as soon as possible at info@3deesrecruitment.com, quoting my application reference number.
+
+### 5.2 Background check
+
+I consent to 3 Dees Consulting Works & Resourcing Ltd, and the employer I am applying to, checking the information in my application. This may include confirming my identity, qualifications, professional licences and employment history with the schools, institutions, licensing bodies and former employers concerned.
+
+Where the role requires it, this may also include a police check, a medical examination or a drug test. I will be told before any of these is carried out.
+
+### 5.3 Reference check
+
+I consent to 3 Dees Consulting Works & Resourcing Ltd, and the employer I am applying to, contacting the referees I have named, to ask about my work, conduct and suitability for the role.
+
+I confirm that my referees know I have named them and have agreed to be contacted.
+
+### 5.4 Medical fitness
+
+*This declaration applies only to jobs that need it.*
+
+Where the role requires it, I declare that, to the best of my knowledge, I am physically and mentally fit to carry out the duties of the role I am applying for.
+
+I understand that:
+
+- this declaration on its own does not ask for medical records or details of any health condition. Some jobs also ask for a medical certificate; if so, the application form will show it
+- the employer may ask for a medical examination before confirming an offer, and will tell me if so
+- a false declaration may lead to my application being rejected or an offer being withdrawn
+
+This declaration is not a question about disability. If you need any reasonable adjustment to apply or to do the job, please tell us at info@3deesrecruitment.com — it will not count against your application.
+
+### 5.5 Right to work and criminal record
+
+I declare that I have the right to work in Nigeria, and that I have told 3DEES about any criminal record I have where the job asks for it. [[LAWYER: confirm wording; this replaces the former separate right-to-work and criminal-record tick-boxes]]
+
+## 6. No guarantee of a job
 
 Submitting an application does not guarantee an interview, a shortlisting, or a job offer. Every application is reviewed by people, and the final hiring decision is made by the employer, not by 3DEES.
 
 Job openings may be changed, paused or closed at any time, including before the closing date shown, for example when all positions are filled.
 
-## 6. We never charge applicants
+## 7. We never charge applicants
 
 3DEES does not charge applicants any fee — not to apply, not for an interview, not for "processing", training or medicals arranged by us, and not to secure a job offer.
 
 If anyone asks you for money in the name of 3DEES or any of our clients, do not pay. Report it to us at info@3deesrecruitment.com.
 
-## 7. How we share your application
+## 8. How we share your application
 
 If your application passes our review, we send it — including your documents — to the employer for that job so they can make a decision. The employer then tells us whether they accept or decline you. Our Privacy Policy explains this in full.
 
-## 8. Using the website properly
+## 9. Using the website properly
 
 You must not:
 - give false information or upload forged, altered or someone else's documents
@@ -82,15 +138,15 @@ You must not:
 
 We may reject an application, remove information, or block access if we reasonably believe these rules have been broken.
 
-## 9. Job information
+## 10. Job information
 
 Job descriptions are prepared by us using information from our clients. We try to keep them accurate and up to date, but details such as salary, location and start date may change. The terms of any job are set by the employer in their offer and contract, not by this website.
 
-## 10. Our content
+## 11. Our content
 
 The text, logos and design of this website belong to 3DEES or are used with permission. You may view and print pages for your own personal use, but you may not copy or reuse them for any other purpose without our written permission.
 
-## 11. Our responsibility to you
+## 12. Our responsibility to you
 
 We work to keep this website available and secure, but we cannot promise it will always be available or free from errors. We are not responsible for:
 - decisions made by employers about your application
@@ -99,15 +155,15 @@ We work to keep this website available and secure, but we cannot promise it will
 
 Nothing in these terms limits any rights you have under Nigerian law that cannot be excluded.
 
-## 12. Changes to these terms
+## 13. Changes to these terms
 
 We may update these terms from time to time. The date at the top of this page shows when they were last changed. The terms that apply to your application are the ones in force when you submitted it.
 
-## 13. Law that applies
+## 14. Law that applies
 
 These terms are governed by the laws of the Federal Republic of Nigeria. Any dispute will be handled by the courts of [[COURT LOCATION]], Nigeria.
 
-## 14. Contact us
+## 15. Contact us
 
 3 Dees Consulting Works & Resourcing Ltd
 [[REGISTERED ADDRESS]]
@@ -142,7 +198,7 @@ Email for privacy questions and requests: info@3deesrecruitment.com
 - **Health information, where a job requires it** — whether you are physically fit for the role, your medical fitness declaration, and a medical certificate. During verification, medical and drug test results may also be added to your application
 - **Criminal record information, where a job requires it** — your answer to whether you have a criminal record. During verification, a police check report may also be added to your application
 - **Documents** — files you upload, such as your CV, certificates, identification documents and photographs
-- **Your declarations and consents** — a record that you agreed to these terms, this policy and the Applicant Declarations, your consent to background and reference checks, and, where a job asks for it, your declaration that you are medically fit for the role
+- **Your declarations and consents** — a record that you agreed to these terms (including the declarations in section 5) and this policy, your consent to background and reference checks, and, where a job asks for it, your declaration that you are medically fit for the role
 
 **When you contact us** through the contact form, we collect your name, email address, phone number, organisation name (if given) and your message.
 
@@ -248,79 +304,17 @@ Email: info@3deesrecruitment.com
 
 ---
 
-# PAGE 3 — Applicant Declarations
-
-**Applicant Declarations**
-*Last updated: [[EFFECTIVE DATE]]*
-
-When you apply for a job through 3DEES, you make the declarations and give the consents set out below. Each one has its own tick-box on the application form. Please read them carefully.
-
-You can withdraw a consent at any time by emailing info@3deesrecruitment.com with your application reference number. If you do, we may not be able to continue with your application.
-
-## Accuracy of information
-<!-- anchor: accuracy -->
-
-By submitting my application, I declare that:
-
-1. All the information I have given in this application is true, complete and accurate to the best of my knowledge.
-2. I have not left out any information that could reasonably affect the decision on my application.
-3. Every document I have uploaded is genuine, belongs to me, and has not been altered in any way.
-4. I am applying for myself, not on behalf of anyone else.
-5. Any referees I have named have agreed to be contacted about me.
-
-I understand that if any information I have given is found to be false, misleading or incomplete — at any time, including after I have been hired:
-
-- my application may be rejected
-- any job offer may be withdrawn
-- if I have already been employed, my employment may be ended
-- where the matter involves forged or fraudulent documents, it may be reported to the relevant authorities
-
-If any of my details change, or I find a mistake in my application after submitting it, I will tell 3DEES as soon as possible at info@3deesrecruitment.com, quoting my application reference number.
-
-## Background check
-<!-- anchor: background-check -->
-
-I consent to 3 Dees Consulting Works & Resourcing Ltd, and the employer I am applying to, checking the information in my application. This may include confirming my identity, qualifications, professional licences and employment history with the schools, institutions, licensing bodies and former employers concerned.
-
-Where the role requires it, this may also include a police check, a medical examination or a drug test. I will be told before any of these is carried out.
-
-## Reference check
-<!-- anchor: reference-check -->
-
-I consent to 3 Dees Consulting Works & Resourcing Ltd, and the employer I am applying to, contacting the referees I have named, to ask about my work, conduct and suitability for the role.
-
-I confirm that my referees know I have named them and have agreed to be contacted.
-
-## Medical fitness
-<!-- anchor: medical-fitness -->
-
-*This declaration only appears on jobs that need it.*
-
-I declare that, to the best of my knowledge, I am physically and mentally fit to carry out the duties of the role I am applying for.
-
-I understand that:
-
-- this declaration on its own does not ask for medical records or details of any health condition. Some jobs also ask for a medical certificate; if so, the application form will show it
-- the employer may ask for a medical examination before confirming an offer, and will tell me if so
-- a false declaration may lead to my application being rejected or an offer being withdrawn
-
-This declaration is not a question about disability. If you need any reasonable adjustment to apply or to do the job, please tell us at info@3deesrecruitment.com — it will not count against your application.
-
----
-
 # CHECKBOX PANEL TEXT — for the Declarations step of the application form
 
-Each declaration on the form shows a short title, one line explaining it, the tick-box, and a "Read more" link (opens in a new tab).
+The form has two tick-boxes. Each shows a short title, one line explaining it, the tick-box, and a "Read more" link (opens in a new tab).
 
 | Field key | Title | One-line explanation | Read more link |
 |---|---|---|---|
-| agreeTerms | Terms & Conditions | The rules for using this site and applying for jobs through 3DEES. | /terms |
+| agreeTerms | Terms & Conditions | The rules for applying through 3DEES. By ticking, you also confirm your information is true, consent to background and reference checks, and declare you are eligible and fit for the role. | /terms |
 | agreePrivacy | Privacy Policy | How we collect, use and share your information, including with the employer. | /privacy |
-| declarationAccurate | Accuracy of information | Everything in your application is true, and your documents are genuine. | /declaration#accuracy |
-| consentBackgroundCheck | Background check | We and the employer may confirm your identity, qualifications and work history. | /declaration#background-check |
-| consentReferenceCheck | Reference check | We and the employer may contact the referees you have named. | /declaration#reference-check |
-| medicalFitnessDecl | Medical fitness | You are fit to carry out the duties of this role. | /declaration#medical-fitness |
+
+Longer text for `agreeTerms` (for tooltips / screen readers if used): "By ticking this box you accept the Terms & Conditions, which include: your declaration that everything in your application is true and your documents are genuine; your consent to background and reference checks; and your declarations that you have the right to work in Nigeria, are physically fit for the role (where the role requires it), and have disclosed any criminal record."
 
 ---
 
-*Before launch: have a Nigerian lawyer review all three pages and the checkbox text, and keep the ECO Green legal name consistent everywhere it appears.*
+*Before launch: have a Nigerian lawyer review both pages and the checkbox text (including the bundled-consent point at the top of this file), and keep the ECO Green legal name consistent everywhere it appears.*

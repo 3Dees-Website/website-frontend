@@ -2,9 +2,8 @@ User-agent: *
 Allow: /
 
 # Legal pages still hold placeholder content pending lawyer review.
-# Remove these three lines once the final content is live.
+# Remove these two lines once the final content is live.
 Disallow: /terms
 Disallow: /privacy
-Disallow: /declaration
 
 Sitemap: https://3deesrecruitment.com/sitemap.xml

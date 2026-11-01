@@ -15,7 +15,6 @@ import { About } from './pages/About';
 import { Contact } from './pages/Contact';
 import { Terms } from './pages/Terms';
 import { Privacy } from './pages/Privacy';
-import { Declaration } from './pages/Declaration';
 
 
 function PublicBaseLayout() {
@@ -48,7 +47,7 @@ export default function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
-            <Route path="/declaration" element={<Declaration />} />
+            <Route path="/declaration" element={<Navigate to="/terms#declarations" replace />} />
           </Route>
 
           {/* CATCH ALL WILDCARDS */}

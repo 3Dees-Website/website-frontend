@@ -49,7 +49,7 @@ export function Privacy() {
           <li><strong>Health information, where a job requires it</strong> — whether you are physically fit for the role, your medical fitness declaration, and a medical certificate. During verification, medical and drug test results may also be added to your application</li>
           <li><strong>Criminal record information, where a job requires it</strong> — your answer to whether you have a criminal record. During verification, a police check report may also be added to your application</li>
           <li><strong>Documents</strong> — files you upload, such as your CV, certificates, identification documents and photographs</li>
-          <li><strong>Your declarations and consents</strong> — a record that you agreed to these terms, this policy and the Applicant Declarations, your consent to background and reference checks, and, where a job asks for it, your declaration that you are medically fit for the role</li>
+          <li><strong>Your declarations and consents</strong> — a record that you agreed to these terms (including the declarations in section 5) and this policy, your consent to background and reference checks, and, where a job asks for it, your declaration that you are medically fit for the role</li>
         </ul>
         <p className="legal-text">
           <strong>When you contact us</strong> through the contact form, we collect your name, email address, phone number, organisation name (if given) and your message.

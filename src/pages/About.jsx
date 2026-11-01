@@ -100,6 +100,7 @@ export function About() {
       className="about-page"
       id="about-us-page"
     >
+      <title>About | 3DEES</title>
       {/* ── Hero ── */}
       <section className="about-hero">
         <div className="about-hero-inner">

@@ -71,6 +71,7 @@ export function Home() {
       className="home-wrapper"
       id="home-page-container"
     >
+      <title>3 Dees Consulting | Recruitment Services</title>
 
       {/* ── Hero ── */}
       <section className="home-hero">

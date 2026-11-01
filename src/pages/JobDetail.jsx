@@ -54,6 +54,7 @@ export function JobDetail() {
   if (isLoadingJobs) {
     return (
       <div className="jd-loading" aria-live="polite">
+        <title>Jobs | 3DEES</title>
         <div className="jd-skeleton-card">
           <div className="skeleton-line skeleton-line-short" />
           <div className="skeleton-line skeleton-line-long" />
@@ -67,6 +68,7 @@ export function JobDetail() {
   if (!job) {
     return (
       <div className="jd-not-found">
+        <title>Jobs | 3DEES</title>
         <h2 className="jd-not-found-title">Vacancy Not Found</h2>
         <p className="jd-not-found-desc">
           The requested recruitment listing does not exist or has been withdrawn by administrative oversight.
@@ -90,6 +92,7 @@ export function JobDetail() {
       className="jd-page"
       id={`job-detail-page-${job.id}`}
     >
+      <title>{`${job.title} | 3DEES`}</title>
       {/* Breadcrumb */}
       <div className="jd-breadcrumb">
         <Link to="/" className="jd-breadcrumb-link">Home</Link>

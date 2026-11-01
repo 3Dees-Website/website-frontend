@@ -78,6 +78,7 @@ export function Apply() {
   if (isLoadingJobs || isLoadingCatalog) {
     return (
       <div className="apply-not-found">
+        <title>Apply | 3DEES</title>
         <p className="apply-not-found-desc">Loading vacancy details…</p>
       </div>
     );
@@ -86,6 +87,7 @@ export function Apply() {
   if (!job) {
     return (
       <div className="apply-not-found">
+        <title>Apply | 3DEES</title>
         <h2 className="apply-not-found-title">Invalid Application Route</h2>
         <p className="apply-not-found-desc">
           The careers portal you are trying to access does not match any active recruitment workflows.
@@ -98,6 +100,7 @@ export function Apply() {
   if (!catalog) {
     return (
       <div className="apply-not-found">
+        <title>Apply | 3DEES</title>
         <h2 className="apply-not-found-title">Application Form Unavailable</h2>
         <p className="apply-not-found-desc">
           We could not load the application form definitions. Please check your connection and try again.
@@ -227,6 +230,7 @@ export function Apply() {
 
   return (
     <div className="apply-page" id="apply-workflow-page">
+      <title>{`Apply — ${job.title} | 3DEES`}</title>
 
       {/* Title */}
       <div className="apply-page-header">

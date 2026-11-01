@@ -71,6 +71,7 @@ export function Contact() {
       className="contact-page"
       id="contact-us-page"
     >
+      <title>Contact | 3DEES</title>
       {/* Header */}
       <div className="contact-header">
         <span className="contact-eyebrow">Connect with 3DEES</span>

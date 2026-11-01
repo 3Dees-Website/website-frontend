@@ -71,6 +71,7 @@ export function Jobs() {
       className="jobs-page"
       id="jobs-page"
     >
+      <title>Jobs | 3DEES</title>
       {/* Breadcrumbs */}
       <div className="jobs-breadcrumb">
         <Link to="/" className="jobs-breadcrumb-link">Home</Link>

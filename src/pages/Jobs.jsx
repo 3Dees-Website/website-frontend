@@ -15,19 +15,12 @@ export function Jobs() {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [selectedLocation, setSelectedLocation] = useState('All');
   const [selectedType, setSelectedType] = useState('All');
   const [visibleCount, setVisibleCount] = useState(6);
 
   const categories = useMemo(() => {
     const activeJobs = jobs.filter((j) => j.status === 'Active');
     const set = new Set(activeJobs.map((j) => j.category));
-    return ['All', ...Array.from(set)];
-  }, [jobs]);
-
-  const locations = useMemo(() => {
-    const activeJobs = jobs.filter((j) => j.status === 'Active');
-    const set = new Set(activeJobs.map((j) => j.location.split(' ')[0]));
     return ['All', ...Array.from(set)];
   }, [jobs]);
 
@@ -45,22 +38,20 @@ export function Jobs() {
         job.clientOrg.toLowerCase().includes(searchTerm.toLowerCase()) ||
         job.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = selectedCategory === 'All' || job.category === selectedCategory;
-      const matchesLocation = selectedLocation === 'All' || job.location.startsWith(selectedLocation);
       const matchesType = selectedType === 'All' || job.type === selectedType;
-      return matchesSearch && matchesCategory && matchesLocation && matchesType;
+      return matchesSearch && matchesCategory && matchesType;
     });
-  }, [jobs, searchTerm, selectedCategory, selectedLocation, selectedType]);
+  }, [jobs, searchTerm, selectedCategory, selectedType]);
 
   const handleResetFilters = () => {
     setSearchTerm('');
     setSelectedCategory('All');
-    setSelectedLocation('All');
     setSelectedType('All');
     setVisibleCount(6);
   };
 
   const paginatedJobs = filteredJobs.slice(0, visibleCount);
-  const hasActiveFilters = searchTerm || selectedCategory !== 'All' || selectedLocation !== 'All' || selectedType !== 'All';
+  const hasActiveFilters = searchTerm || selectedCategory !== 'All' || selectedType !== 'All';
 
   return (
     <motion.div
@@ -117,22 +108,6 @@ export function Jobs() {
               {categories.map((cat) => (
                 <option key={cat} value={cat}>
                   {cat === 'All' ? 'All Categories' : cat}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="jobs-filter-group">
-            <label className="jobs-filter-label">State Location</label>
-            <select
-              value={selectedLocation}
-              onChange={(e) => setSelectedLocation(e.target.value)}
-              className="jobs-select"
-              id="filter-location-select"
-            >
-              {locations.map((loc) => (
-                <option key={loc} value={loc}>
-                  {loc === 'All' ? 'All States' : loc}
                 </option>
               ))}
             </select>

@@ -24,6 +24,8 @@ export function Jobs() {
     return ['All', ...Array.from(set)];
   }, [jobs]);
 
+  const hasActiveJobs = useMemo(() => jobs.some((j) => j.status === 'Active'), [jobs]);
+
   const types = useMemo(() => {
     const activeJobs = jobs.filter((j) => j.status === 'Active');
     const set = new Set(activeJobs.map((j) => j.type));
@@ -79,70 +81,72 @@ export function Jobs() {
       </div>
 
       {/* Filters Card */}
-      <div className="jobs-filters-card" id="filter-wrapper-card">
-        <div className="jobs-filters-grid">
+      {(isLoadingJobs || hasActiveJobs) && (
+        <div className="jobs-filters-card" id="filter-wrapper-card">
+          <div className="jobs-filters-grid">
 
-          <div className="jobs-filter-group">
-            <label className="jobs-filter-label">Keyword Search</label>
-            <div className="jobs-search-wrapper">
-              <Search className="jobs-search-icon" />
-              <input
-                type="text"
-                placeholder="Job title, client, keyword..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="jobs-search-input"
-                id="search-input-field"
-              />
+            <div className="jobs-filter-group">
+              <label className="jobs-filter-label">Keyword Search</label>
+              <div className="jobs-search-wrapper">
+                <Search className="jobs-search-icon" />
+                <input
+                  type="text"
+                  placeholder="Job title, client, keyword..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="jobs-search-input"
+                  id="search-input-field"
+                />
+              </div>
+            </div>
+
+            <div className="jobs-filter-group">
+              <label className="jobs-filter-label">Category</label>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="jobs-select"
+                id="filter-category-select"
+              >
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat === 'All' ? 'All Categories' : cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="jobs-filter-group">
+              <label className="jobs-filter-label">Employment Type</label>
+              <select
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+                className="jobs-select"
+                id="filter-type-select"
+              >
+                {types.map((tp) => (
+                  <option key={tp} value={tp}>
+                    {tp === 'All' ? 'All Types' : tp}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
-          <div className="jobs-filter-group">
-            <label className="jobs-filter-label">Category</label>
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="jobs-select"
-              id="filter-category-select"
-            >
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat === 'All' ? 'All Categories' : cat}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="jobs-filter-group">
-            <label className="jobs-filter-label">Employment Type</label>
-            <select
-              value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value)}
-              className="jobs-select"
-              id="filter-type-select"
-            >
-              {types.map((tp) => (
-                <option key={tp} value={tp}>
-                  {tp === 'All' ? 'All Types' : tp}
-                </option>
-              ))}
-            </select>
-          </div>
+          {hasActiveFilters && (
+            <div className="jobs-reset-row">
+              <button
+                onClick={handleResetFilters}
+                className="jobs-reset-btn"
+                id="reset-filters-btn"
+              >
+                <RotateCcw className="jobs-reset-icon" />
+                <span>Reset Filters</span>
+              </button>
+            </div>
+          )}
         </div>
-
-        {hasActiveFilters && (
-          <div className="jobs-reset-row">
-            <button
-              onClick={handleResetFilters}
-              className="jobs-reset-btn"
-              id="reset-filters-btn"
-            >
-              <RotateCcw className="jobs-reset-icon" />
-              <span>Reset Filters</span>
-            </button>
-          </div>
-        )}
-      </div>
+      )}
 
       {/* Job Listings */}
       <div className="jobs-listings">
@@ -228,13 +232,24 @@ export function Jobs() {
               <div className="jobs-empty-icon-wrap">
                 <Inbox className="jobs-empty-icon" />
               </div>
-              <h3 className="jobs-empty-title">No Vacancies Matched</h3>
-              <p className="jobs-empty-desc">
-                We could not locate active recruitment projects matching your current filters. Try relaxing keywords or state parameters.
-              </p>
-              <button onClick={handleResetFilters} className="jobs-empty-btn">
-                Clear Search & View All
-              </button>
+              {hasActiveJobs ? (
+                <>
+                  <h3 className="jobs-empty-title">No Vacancies Matched</h3>
+                  <p className="jobs-empty-desc">
+                    We could not locate active recruitment projects matching your current filters. Try a different keyword, category or employment type.
+                  </p>
+                  <button onClick={handleResetFilters} className="jobs-empty-btn">
+                    Clear Search & View All
+                  </button>
+                </>
+              ) : (
+                <>
+                  <h3 className="jobs-empty-title">No Open Positions Right Now</h3>
+                  <p className="jobs-empty-desc">
+                    There are currently no active job openings. Check back soon.
+                  </p>
+                </>
+              )}
             </motion.div>
           ) : null}
         </AnimatePresence>

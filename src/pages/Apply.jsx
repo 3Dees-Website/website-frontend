@@ -505,7 +505,7 @@ export function Apply() {
             <ul className="apply-sidebar-list">
               <li>Ensure spelling matches NIN details exactly.</li>
               <li>Scans of degrees or certificates must clearly display seal details.</li>
-              <li>Attachments must remain legible under 5MB sizes.</li>
+              <li>Attachments must remain legible under 10MB sizes.</li>
             </ul>
           </div>
 

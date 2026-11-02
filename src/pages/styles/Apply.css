@@ -387,6 +387,27 @@
   margin-top: -0.125rem;
 }
 
+.apply-age-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fff;
+  border: 1px solid rgba(243,244,246,0.5);
+  border-left: 3px solid var(--color-brand-primary);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-subtle);
+  padding: 0.75rem 1rem;
+  font-size: 0.75rem;
+  color: #374151;
+}
+
+.apply-age-notice-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  color: var(--color-brand-primary);
+}
+
 .apply-input {
   font-size: 0.75rem;
   padding: 0.75rem;

@@ -8,7 +8,8 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useJob } from '../hooks/useJob';
 import { useFieldCatalog } from '../hooks/useFieldCatalog';
-import { MapPin, Briefcase, Calendar, Clipboard, ShieldCheck, CheckCircle2, Circle, ChevronRight } from 'lucide-react';
+import { MapPin, Briefcase, Calendar, Clipboard, ShieldCheck, CheckCircle2, Circle, ChevronRight, UserCheck } from 'lucide-react';
+import { formatAgeRequirement } from '../utils/jobAge';
 import './styles/JobDetail.css';
 
 export function JobDetail() {
@@ -81,6 +82,7 @@ export function JobDetail() {
     );
   }
 
+  const ageRequirement = formatAgeRequirement(job.minAge, job.maxAge);
   const responsibilitiesList = splitItems(job.responsibilities);
   const requirementsList = splitItems(job.requirements);
 
@@ -123,6 +125,12 @@ export function JobDetail() {
                 <Briefcase className="jd-meta-icon" />
                 <span className="jd-meta-value">{job.type}</span>
               </span>
+              {ageRequirement && (
+                <span className="jd-meta-item">
+                  <UserCheck className="jd-meta-icon" />
+                  <span>Age: <strong className="jd-meta-value">{ageRequirement}</strong></span>
+                </span>
+              )}
               <span className="jd-meta-item">
                 <Calendar className="jd-meta-icon" />
                 <span>Deadline: <strong className="jd-meta-value">{new Date(job.closingDate).toLocaleDateString()}</strong></span>
@@ -204,6 +212,12 @@ export function JobDetail() {
                   {job.openings} {job.openings === 1 ? 'Slot' : 'Slots'}
                 </span>
               </div>
+              {ageRequirement && (
+                <div className="jd-dossier-row">
+                  <span className="jd-dossier-label">Age Requirement</span>
+                  <span className="jd-dossier-value">{ageRequirement}</span>
+                </div>
+              )}
               <div className="jd-dossier-row">
                 <span className="jd-dossier-label">Closing Date</span>
                 <span className="jd-dossier-value jd-dossier-primary">

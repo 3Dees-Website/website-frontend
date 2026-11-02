@@ -23,7 +23,8 @@ import {
   formatAnswerForReview,
 } from '../utils/fieldCatalogHelpers';
 import { DECLARATION_PANEL, DECLARATION_PANEL_ORDER } from '../constants/declarationPanel';
-import { ChevronRight, ChevronLeft, Check, AlertCircle, MapPin, Briefcase } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Check, AlertCircle, MapPin, Briefcase, UserCheck } from 'lucide-react';
+import { formatAgeRequirement } from '../utils/jobAge';
 import './styles/Apply.css';
 
 const REVIEW_STEP_KEY = '__review';
@@ -41,6 +42,12 @@ export function Apply() {
 
   // All hooks must be declared unconditionally before any early returns.
   const reqs = useMemo(() => job?.applicationRequirements || {}, [job]);
+  const minAge = job?.minAge ?? null;
+  const maxAge = job?.maxAge ?? null;
+  const ageRange = useMemo(
+    () => (minAge === null && maxAge === null ? null : { minAge, maxAge }),
+    [minAge, maxAge]
+  );
 
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);
@@ -170,7 +177,7 @@ export function Apply() {
     const section = steps[idx];
     if (section.key === REVIEW_STEP_KEY) return true;
     const fields = getVisibleSectionFields(catalog, section.key, reqs, answers);
-    const stepErrors = validateSectionFields(fields, reqs, answers, files);
+    const stepErrors = validateSectionFields(fields, reqs, answers, files, ageRange);
     setErrors(stepErrors);
     return Object.keys(stepErrors).length === 0;
   };
@@ -297,6 +304,16 @@ export function Apply() {
               ))}
             </div>
 
+            {ageRange && (
+              <div className="apply-age-notice" role="note">
+                <UserCheck className="apply-age-notice-icon" />
+                <span>
+                  This role requires applicants aged{' '}
+                  <strong>{maxAge === null ? `${minAge} or older` : formatAgeRequirement(minAge, maxAge)}</strong>.
+                </span>
+              </div>
+            )}
+
             {/* Form Card */}
             <div className="apply-form-card">
               <AnimatePresence custom={direction} mode="wait">
@@ -349,6 +366,7 @@ export function Apply() {
                               onFileAdd={handleFileAdd}
                               onFileRemoveAt={handleFileRemoveAt}
                               addToast={addToast}
+                              ageRange={ageRange}
                             />
                           );
                           return (

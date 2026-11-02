@@ -10,6 +10,8 @@ const normalizeJob = (job) => ({
   location: job.location,
   openings: job.openings,
   salaryRange: job.salary_range,
+  minAge: job.min_age ?? null,
+  maxAge: job.max_age ?? null,
   description: job.description,
   responsibilities: job.responsibilities,
   requirements: job.requirements,

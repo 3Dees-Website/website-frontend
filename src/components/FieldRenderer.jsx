@@ -7,7 +7,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { Upload, FileCheck, X, ExternalLink } from 'lucide-react';
 import { getSubfieldsOf, validateFile, deriveAge } from '../utils/fieldCatalogHelpers';
-import { DECLARATION_PANEL } from '../constants/declarationPanel';
+import { ageRequirementProblem } from '../utils/jobAge';
+import { DECLARATION_PANEL }from '../constants/declarationPanel';
 import { PhotoCaptureControl } from './CameraCapture';
 import '../pages/styles/Apply.css';
 
@@ -29,6 +30,7 @@ export function FieldRenderer({
   onFileAdd,
   onFileRemoveAt,
   addToast,
+  ageRange,
 }) {
   const value = answers[field.key];
   const error = errors[field.key];
@@ -94,6 +96,11 @@ export function FieldRenderer({
     case 'date': {
       const isDob = field.key === 'dateOfBirth';
       const age = isDob ? deriveAge(value) : null;
+      // Shown live as the date is typed; once Next has set `error` for this
+      // field it carries the same text, so only one of the two is rendered.
+      const ageProblem = isDob && ageRange && !error
+        ? ageRequirementProblem(age, ageRange.minAge, ageRange.maxAge)
+        : null;
       return (
         <div className="apply-field">
           {labelNode}
@@ -106,6 +113,7 @@ export function FieldRenderer({
           {isDob && age !== null && (
             <span className="apply-age-preview">Age: {age} years</span>
           )}
+          {ageProblem && <span className="apply-error-msg">{ageProblem}</span>}
           {error && <span className="apply-error-msg">{error}</span>}
         </div>
       );
@@ -210,6 +218,7 @@ export function FieldRenderer({
                     onFileAdd={onFileAdd}
                     onFileRemoveAt={onFileRemoveAt}
                     addToast={addToast}
+                    ageRange={ageRange}
                   />
                 ))}
               </motion.div>

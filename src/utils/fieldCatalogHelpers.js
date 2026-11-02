@@ -5,7 +5,9 @@
  * per-field errors before a round trip.
  */
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { ageRequirementProblem } from './jobAge';
+
+const EMAIL_RE =/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const TEL_RE = /^[0-9+\s]+$/;
 
 export const deriveFullName = ({ firstName, middleName, lastName } = {}) =>
@@ -135,7 +137,7 @@ export const validateFile = (field, file) => {
 };
 
 /** Validate every visible field of one wizard step. Returns { [key]: error }. */
-export const validateSectionFields = (fields, applicationRequirements, answers, files) => {
+export const validateSectionFields = (fields, applicationRequirements, answers, files, ageRange) => {
   const errors = {};
   fields.forEach((field) => {
     const requirement = getRequirement(field, applicationRequirements);
@@ -161,7 +163,10 @@ export const validateSectionFields = (fields, applicationRequirements, answers, 
 
     if (field.key === 'lga') return; // dependent select — any chosen/typed value is valid
 
-    const err = validateFieldValue(field, raw);
+    let err = validateFieldValue(field, raw);
+    if (!err && field.key === 'dateOfBirth' && ageRange) {
+      err = ageRequirementProblem(deriveAge(raw), ageRange.minAge, ageRange.maxAge);
+    }
     if (err) errors[field.key] = err;
   });
   return errors;

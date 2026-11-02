@@ -9,7 +9,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useJobsList } from '../hooks/useJobsList';
 import { useJobFilters } from '../hooks/useJobFilters';
 import { useLoadingGate } from '../hooks/useLoadingGate';
-import { Search, MapPin, Briefcase, Calendar, RotateCcw, ChevronRight, Inbox } from 'lucide-react';
+import { Search, MapPin, Briefcase, Calendar, RotateCcw, ChevronRight, Inbox, UserCheck } from 'lucide-react';
+import { formatAgeRequirement } from '../utils/jobAge';
 import './styles/Jobs.css';
 
 const SEARCH_DEBOUNCE_MS = 350;
@@ -199,6 +200,12 @@ export function Jobs() {
                         <Briefcase className="job-meta-icon" />
                         <span>{job.type}</span>
                       </div>
+                      {formatAgeRequirement(job.minAge, job.maxAge) && (
+                        <div className="job-meta-item job-meta-full">
+                          <UserCheck className="job-meta-icon" />
+                          <span>Age: {formatAgeRequirement(job.minAge, job.maxAge)}</span>
+                        </div>
+                      )}
                       <div className="job-meta-item job-meta-full">
                         <Calendar className="job-meta-icon" />
                         <span>Deadline: <strong className="job-meta-deadline">{new Date(job.closingDate).toLocaleDateString()}</strong></span>
